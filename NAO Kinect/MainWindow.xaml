@@ -12,8 +12,6 @@
         <TextBlock x:Name="debug2" HorizontalAlignment="Left" Height="114" Margin="661,422,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="206"/>
         <TextBox x:Name="ipBox" HorizontalAlignment="Left" Height="19" Margin="10,32,0,0" TextWrapping="Wrap" Text="69.88.163.51" VerticalAlignment="Top" Width="100"/>
         <Label Content="NAO IP:" HorizontalAlignment="Left" Margin="5,6,0,0" VerticalAlignment="Top"/>
-        <Slider x:Name="angleSlider" HorizontalAlignment="Left" Margin="398,32,0,0" VerticalAlignment="Top" Width="252" SmallChange="1" Maximum="27" Minimum="-27" ValueChanged="angleSlider_ValueChanged"/>
-        <Label Content="Kinect Angle" HorizontalAlignment="Left" Margin="398,10,0,0" VerticalAlignment="Top"/>
 
     </Grid>
 </Window>

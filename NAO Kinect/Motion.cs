@@ -1,19 +1,21 @@
-﻿/**
+﻿/*
  * This software was developed by Austin Hughes
- * Last Modified: 2013-06-13
+ * Last Modified: 2014-08-20
  */
 
+// System imports
 using System;
-using System.Collections.Generic;
-using System.Collections;
+using System.IO;
 using System.Windows;
+
+// Addebaran import
 using Aldebaran.Proxies;
 
-namespace NAO_Camera_WPF
+namespace NAO_Kinect
 {
     class Motion
     {
-        MotionProxy naoMotion = null;
+        MotionProxy naoMotion;
 
         /// <summary>
         /// Connects to the motion system in the NAO robot
@@ -33,7 +35,7 @@ namespace NAO_Camera_WPF
             catch (Exception e)
             {
                 MessageBox.Show("Exception occurred, error log in C:\\NAOcam\\exception.txt");
-                System.IO.File.WriteAllText(@"C:\\NAOcam\\exception.txt", e.ToString()); // write exepctions to text file
+                File.WriteAllText(@"C:\\NAOcam\\exception.txt", e.ToString()); // write exepctions to text file
             }
         }
 
@@ -58,7 +60,7 @@ namespace NAO_Camera_WPF
             {
                 // display error message and write exceptions to a file
                 MessageBox.Show("Exception occurred, error log in C:\\NAOcam\\exception.txt");
-                System.IO.File.WriteAllText(@"C:\\NAOcam\\exception.txt", e.ToString());
+                File.WriteAllText(@"C:\\NAOcam\\exception.txt", e.ToString());
             }
         }
 
@@ -76,7 +78,7 @@ namespace NAO_Camera_WPF
             {
                 // display error message and write exceptions to a file
                 MessageBox.Show("Exception occurred, error log in C:\\NAOcam\\exception.txt");
-                System.IO.File.WriteAllText(@"C:\\NAOcam\\exception.txt", e.ToString());
+                File.WriteAllText(@"C:\\NAOcam\\exception.txt", e.ToString());
             }
         }
 
@@ -94,7 +96,7 @@ namespace NAO_Camera_WPF
             {
                 // display error message and write exceptions to a file
                 MessageBox.Show("Exception occurred, error log in C:\\NAOcam\\exception.txt");
-                System.IO.File.WriteAllText(@"C:\\NAOcam\\exception.txt", e.ToString());
+                File.WriteAllText(@"C:\\NAOcam\\exception.txt", e.ToString());
             }
         }
 
@@ -107,7 +109,7 @@ namespace NAO_Camera_WPF
         {
             try
             {
-                List<float> angles = naoMotion.getAngles(joint, false);
+                var angles = naoMotion.getAngles(joint, false);
 
                 return angles[0];
             }
@@ -115,7 +117,7 @@ namespace NAO_Camera_WPF
             {
                 // display error message and write exceptions to a file
                 MessageBox.Show("Exception occurred, error log in C:\\NAOcam\\exception.txt");
-                System.IO.File.WriteAllText(@"C:\\NAOcam\\exception.txt", e.ToString());
+                File.WriteAllText(@"C:\\NAOcam\\exception.txt", e.ToString());
             }
 
             return -1;
@@ -136,7 +138,7 @@ namespace NAO_Camera_WPF
             {
                 // display error message and write exceptions to a file
                 MessageBox.Show("Exception occurred, error log in C:\\NAOcam\\exception.txt");
-                System.IO.File.WriteAllText(@"C:\\NAOcam\\exception.txt", e.ToString());
+                File.WriteAllText(@"C:\\NAOcam\\exception.txt", e.ToString());
             }
         }
     }

@@ -1,17 +1,14 @@
-﻿/**
+﻿/*
  * This software was developed by Austin Hughes
  * Last Modified: 2013-08-22
  */
 
+// System imports
 using System;
-using System.Linq;
 using System.Collections.Generic;
 using System.Windows;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Controls;
-using System.Windows.Shapes;
-using System.Threading.Tasks;
+
+// Microsoft imports
 using Microsoft.Speech.AudioFormat;
 using Microsoft.Speech.Recognition;
 using Microsoft.Kinect;
@@ -63,7 +60,7 @@ namespace NAO_Kinect
         /// </returns>
         private static RecognizerInfo GetKinectRecognizer()
         {
-            foreach (RecognizerInfo recognizer in SpeechRecognitionEngine.InstalledRecognizers())
+            foreach (var recognizer in SpeechRecognitionEngine.InstalledRecognizers())
             {
                 string value;
                 recognizer.AdditionalInfo.TryGetValue("Kinect", out value);
@@ -84,7 +81,7 @@ namespace NAO_Kinect
             // start voice recongintion
             try
             {
-                RecognizerInfo ri = GetKinectRecognizer();  //Initializes Kinect Recognizer for speech
+                var ri = GetKinectRecognizer();  //Initializes Kinect Recognizer for speech
                 sre = new SpeechRecognitionEngine(ri.Id);   //Initializes Speech Recognition Engine
 
                 //Create simple string array that contains speech recognition data and interpreted values
@@ -94,20 +91,23 @@ namespace NAO_Kinect
                 var commands = new Choices();       //Initializes Choices for engine
 
                 //Adds all values in string arrays to commands for engine
-                for (int i = 0; i < valuesHeard.Length; i++)
+                for (var i = 0; i < valuesHeard.Length; i++)
                 {
                     commands.Add(new SemanticResultValue(valuesHeard[i], valuesInterpreted[i]));
                 }
 
                 //Submits commands to Grammar Builder for engine
-                Grammar g = new Grammar(commands.ToGrammarBuilder());
-                this.sre.LoadGrammar(g);
+                var g = new Grammar(commands.ToGrammarBuilder());
+                sre.LoadGrammar(g);
 
                 //Constantly try to recognize speech
                 sre.SpeechRecognized += SpeechRecognized;
 
+                IReadOnlyList<AudioBeam> audioBeamList = sensor.AudioSource.AudioBeams;
+                System.IO.Stream audioStream = audioBeamList[0].OpenInputStream();
+
                 // Tells the speech engine where to find the audio stream
-                sre.SetInputToAudioStream(sensor.AudioSource.Start(), new SpeechAudioFormatInfo(EncodingFormat.Pcm, 16000, 16, 1, 32000, 2, null));
+                sre.SetInputToAudioStream(audioStream, new SpeechAudioFormatInfo(EncodingFormat.Pcm, 16000, 16, 1, 32000, 2, null));
                 sre.RecognizeAsync(RecognizeMode.Multiple);
             }
             catch (Exception) // Catch to make sure if no Kinect is found program does not crash
@@ -128,7 +128,7 @@ namespace NAO_Kinect
             semanticResult = e.Result.Semantics.Value.ToString();
             confidence = e.Result.Confidence;
 
-            this.OnSpeechEvent();
+            OnSpeechEvent();
         }
 
         /// <summary>
@@ -136,7 +136,7 @@ namespace NAO_Kinect
         /// </summary>
         private void OnSpeechEvent()
         {
-            var handler = this.SpeechEvent;
+            var handler = SpeechEvent;
             if (handler != null)
             {
                 handler(this, EventArgs.Empty);

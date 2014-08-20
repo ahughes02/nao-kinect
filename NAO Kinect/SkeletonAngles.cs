@@ -1,13 +1,12 @@
-﻿/**
+﻿/*
  * This software was developed by Austin Hughes
  * Last Modified: 2013-08-22
  */
 
+// System imports
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+
+// Microsoft imports
 using Microsoft.Kinect;
 
 namespace NAO_Kinect
@@ -17,7 +16,7 @@ namespace NAO_Kinect
         /// <summary>
         /// Holds the skeleton class and the skeleton we want angles for
         /// </summary>
-        private KinectSkeleton kinectSkeleton = null;
+        private KinectSkeleton kinectSkeleton;
         private Skeleton trackedSkeleton = null;
 
         /// <summary>
@@ -37,7 +36,7 @@ namespace NAO_Kinect
         {
             trackedSkeleton = kinectSkeleton.getSkeleton();
 
-            float[] angles = new float[6];
+            var angles = new float[6];
 
             if (trackedSkeleton != null)
             {
@@ -82,9 +81,9 @@ namespace NAO_Kinect
         {
             float angle = 0;
 
-            float p12 = (float)Math.Sqrt(((p1X - p2X) * (p1X - p2X)) + ((p1Y - p2Y) * (p1Y - p2Y)));
-            float p13 = (float)Math.Sqrt(((p1X - p3X) * (p1X - p3X)) + ((p1Y - p3Y) * (p1Y - p3Y)));
-            float p23 = (float)Math.Sqrt(((p2X - p3X) * (p2X - p3X)) + ((p2Y - p3Y) * (p2Y - p3Y)));
+            var p12 = (float)Math.Sqrt(((p1X - p2X) * (p1X - p2X)) + ((p1Y - p2Y) * (p1Y - p2Y)));
+            var p13 = (float)Math.Sqrt(((p1X - p3X) * (p1X - p3X)) + ((p1Y - p3Y) * (p1Y - p3Y)));
+            var p23 = (float)Math.Sqrt(((p2X - p3X) * (p2X - p3X)) + ((p2Y - p3Y) * (p2Y - p3Y)));
 
             return angle = (float)Math.Acos(((p12 * p12) + (p13 * p13) - (p23 * p23)) / (2 * p12 * p13));
         }

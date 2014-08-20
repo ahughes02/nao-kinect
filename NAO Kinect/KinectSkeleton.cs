@@ -1,17 +1,15 @@
-﻿/**
+﻿/*
  * This software was developed by Austin Hughes
- * Last Modified: 2013-08-22
+ * Last Modified: 2014-08-22
  */
 
+// System imports
 using System;
 using System.Linq;
-using System.Collections.Generic;
 using System.Windows;
 using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Controls;
-using System.Windows.Shapes;
-using System.Threading.Tasks;
+
+// Microsoft imports
 using Microsoft.Kinect;
 
 namespace NAO_Kinect
@@ -58,7 +56,7 @@ namespace NAO_Kinect
         /// Variables for tracking closest skeleton
         /// </summary>
         private float closestDistance = 10000f; // Start with a far enough distance
-        private int closestID = 0;
+        private int closestID;
 
         /// <summary>
         /// Class constructor
@@ -69,10 +67,10 @@ namespace NAO_Kinect
             sensor = kinect;
 
             // Create the drawing group we'll use for drawing
-            this.drawingGroup = new DrawingGroup();
+            drawingGroup = new DrawingGroup();
 
             // Create an image source that we can use in our image control
-            this.imageSource = new DrawingImage(this.drawingGroup);
+            imageSource = new DrawingImage(drawingGroup);
 
             // start the skeleton stream
             startSkeletonStream();
@@ -89,7 +87,7 @@ namespace NAO_Kinect
             try
             {
                 // paramaters to smooth input
-                TransformSmoothParameters smoothingParam = new TransformSmoothParameters();
+                var smoothingParam = new TransformSmoothParameters();
                 {
                     smoothingParam.Smoothing = 0.5f;
                     smoothingParam.Correction = 0.1f;
@@ -99,18 +97,18 @@ namespace NAO_Kinect
                 };
 
                 // Enable skeletal tracking
-                this.sensor.SkeletonStream.Enable(smoothingParam);
+                sensor.SkeletonStream.Enable(smoothingParam);
 
                 // Allocate Skeleton Stream data
-                skeletonData = new Skeleton[this.sensor.SkeletonStream.FrameSkeletonArrayLength];
+                skeletonData = new Skeleton[sensor.SkeletonStream.FrameSkeletonArrayLength];
 
                 // Get Ready for Skeleton Ready Events
-                this.sensor.SkeletonFrameReady += new EventHandler<SkeletonFrameReadyEventArgs>(kinect_SkeletonFrameReady);
+                sensor.SkeletonFrameReady += new EventHandler<SkeletonFrameReadyEventArgs>(kinect_SkeletonFrameReady);
 
                 // Ensure AppChoosesSkeletons is set, lets us only track the skeleton we want
-                if (!this.sensor.SkeletonStream.AppChoosesSkeletons)
+                if (!sensor.SkeletonStream.AppChoosesSkeletons)
                 {
-                    this.sensor.SkeletonStream.AppChoosesSkeletons = true; 
+                    sensor.SkeletonStream.AppChoosesSkeletons = true; 
                 }
             }
             catch (Exception)
@@ -124,9 +122,9 @@ namespace NAO_Kinect
         /// </summary>
         public void stopSkeletonStream()
         {
-            if (null != this.sensor)
+            if (null != sensor)
             {
-                this.sensor.SkeletonStream.Disable();
+                sensor.SkeletonStream.Disable();
             }
         }
 
@@ -145,10 +143,10 @@ namespace NAO_Kinect
             using (SkeletonFrame skeletonFrame = e.OpenSkeletonFrame()) 
             {
                 // check that a frame is available
-                if (skeletonFrame != null && this.skeletonData != null) 
+                if (skeletonFrame != null && skeletonData != null) 
                 {
                     // get the skeletal information in this frame
-                    skeletonFrame.CopySkeletonDataTo(this.skeletonData); 
+                    skeletonFrame.CopySkeletonDataTo(skeletonData); 
                 }
             }
 
@@ -156,14 +154,14 @@ namespace NAO_Kinect
             closestDistance = 10000f; 
 
             // draws the skeleton on the screen
-            using (DrawingContext dc = this.drawingGroup.Open())
+            using (var dc = drawingGroup.Open())
             {
                 // Draw a transparent background to set the render size
                 dc.DrawRectangle(Brushes.Black, null, new Rect(0.0, 0.0, RenderWidth, RenderHeight));
 
                 if (skeletonData.Length != 0)
                 {
-                    foreach (Skeleton skeleton in this.skeletonData.Where(s => s.TrackingState != SkeletonTrackingState.NotTracked))
+                    foreach (var skeleton in skeletonData.Where(s => s.TrackingState != SkeletonTrackingState.NotTracked))
                     {
                         if (skeleton.Position.Z < closestDistance)
                         {
@@ -174,24 +172,24 @@ namespace NAO_Kinect
 
                     if (closestID > 0)
                     {
-                        this.sensor.SkeletonStream.ChooseSkeletons(closestID); // Track this skeleton
+                        sensor.SkeletonStream.ChooseSkeletons(closestID); // Track this skeleton
                     }
 
-                    foreach (Skeleton skeleton in this.skeletonData)
+                    foreach (var skeleton in skeletonData)
                     {
                         RenderClippedEdges(skeleton, dc);
 
                         if (skeleton.TrackingState == SkeletonTrackingState.Tracked)
                         {
-                            this.DrawBonesAndJoints(skeleton, dc);
+                            DrawBonesAndJoints(skeleton, dc);
                             trackedSkeleton = skeleton;
                         }
                         else if (skeleton.TrackingState == SkeletonTrackingState.PositionOnly)
                         {
                             dc.DrawEllipse(
-                            this.centerPointBrush,
+                            centerPointBrush,
                             null,
-                            this.SkeletonPointToScreen(skeleton.Position),
+                            SkeletonPointToScreen(skeleton.Position),
                             BodyCenterThickness,
                             BodyCenterThickness);
                         }
@@ -204,10 +202,10 @@ namespace NAO_Kinect
             }
 
             // prevent drawing outside of our render area
-            this.drawingGroup.ClipGeometry = new RectangleGeometry(new Rect(0.0, 0.0, RenderWidth, RenderHeight));
+            drawingGroup.ClipGeometry = new RectangleGeometry(new Rect(0.0, 0.0, RenderWidth, RenderHeight));
 
             // calls our event
-            this.OnNewFrame();
+            OnNewFrame();
         }
 
         /// <summary>
@@ -269,33 +267,33 @@ namespace NAO_Kinect
         private void DrawBonesAndJoints(Skeleton skeleton, DrawingContext drawingContext)
         {
             // Render Torso
-            this.DrawBone(skeleton, drawingContext, JointType.Head, JointType.ShoulderCenter);
-            this.DrawBone(skeleton, drawingContext, JointType.ShoulderCenter, JointType.ShoulderLeft);
-            this.DrawBone(skeleton, drawingContext, JointType.ShoulderCenter, JointType.ShoulderRight);
-            this.DrawBone(skeleton, drawingContext, JointType.ShoulderCenter, JointType.Spine);
-            this.DrawBone(skeleton, drawingContext, JointType.Spine, JointType.HipCenter);
-            this.DrawBone(skeleton, drawingContext, JointType.HipCenter, JointType.HipLeft);
-            this.DrawBone(skeleton, drawingContext, JointType.HipCenter, JointType.HipRight);
+            DrawBone(skeleton, drawingContext, JointType.Head, JointType.ShoulderCenter);
+            DrawBone(skeleton, drawingContext, JointType.ShoulderCenter, JointType.ShoulderLeft);
+            DrawBone(skeleton, drawingContext, JointType.ShoulderCenter, JointType.ShoulderRight);
+            DrawBone(skeleton, drawingContext, JointType.ShoulderCenter, JointType.Spine);
+            DrawBone(skeleton, drawingContext, JointType.Spine, JointType.HipCenter);
+            DrawBone(skeleton, drawingContext, JointType.HipCenter, JointType.HipLeft);
+            DrawBone(skeleton, drawingContext, JointType.HipCenter, JointType.HipRight);
 
             // Left Arm
-            this.DrawBone(skeleton, drawingContext, JointType.ShoulderLeft, JointType.ElbowLeft);
-            this.DrawBone(skeleton, drawingContext, JointType.ElbowLeft, JointType.WristLeft);
-            this.DrawBone(skeleton, drawingContext, JointType.WristLeft, JointType.HandLeft);
+            DrawBone(skeleton, drawingContext, JointType.ShoulderLeft, JointType.ElbowLeft);
+            DrawBone(skeleton, drawingContext, JointType.ElbowLeft, JointType.WristLeft);
+            DrawBone(skeleton, drawingContext, JointType.WristLeft, JointType.HandLeft);
 
             // Right Arm
-            this.DrawBone(skeleton, drawingContext, JointType.ShoulderRight, JointType.ElbowRight);
-            this.DrawBone(skeleton, drawingContext, JointType.ElbowRight, JointType.WristRight);
-            this.DrawBone(skeleton, drawingContext, JointType.WristRight, JointType.HandRight);
+            DrawBone(skeleton, drawingContext, JointType.ShoulderRight, JointType.ElbowRight);
+            DrawBone(skeleton, drawingContext, JointType.ElbowRight, JointType.WristRight);
+            DrawBone(skeleton, drawingContext, JointType.WristRight, JointType.HandRight);
 
             // Left Leg
-            this.DrawBone(skeleton, drawingContext, JointType.HipLeft, JointType.KneeLeft);
-            this.DrawBone(skeleton, drawingContext, JointType.KneeLeft, JointType.AnkleLeft);
-            this.DrawBone(skeleton, drawingContext, JointType.AnkleLeft, JointType.FootLeft);
+            DrawBone(skeleton, drawingContext, JointType.HipLeft, JointType.KneeLeft);
+            DrawBone(skeleton, drawingContext, JointType.KneeLeft, JointType.AnkleLeft);
+            DrawBone(skeleton, drawingContext, JointType.AnkleLeft, JointType.FootLeft);
 
             // Right Leg
-            this.DrawBone(skeleton, drawingContext, JointType.HipRight, JointType.KneeRight);
-            this.DrawBone(skeleton, drawingContext, JointType.KneeRight, JointType.AnkleRight);
-            this.DrawBone(skeleton, drawingContext, JointType.AnkleRight, JointType.FootRight);
+            DrawBone(skeleton, drawingContext, JointType.HipRight, JointType.KneeRight);
+            DrawBone(skeleton, drawingContext, JointType.KneeRight, JointType.AnkleRight);
+            DrawBone(skeleton, drawingContext, JointType.AnkleRight, JointType.FootRight);
 
             // Render Joints
             foreach (Joint joint in skeleton.Joints)
@@ -304,16 +302,16 @@ namespace NAO_Kinect
 
                 if (joint.TrackingState == JointTrackingState.Tracked)
                 {
-                    drawBrush = this.trackedJointBrush;
+                    drawBrush = trackedJointBrush;
                 }
                 else if (joint.TrackingState == JointTrackingState.Inferred)
                 {
-                    drawBrush = this.inferredJointBrush;
+                    drawBrush = inferredJointBrush;
                 }
 
                 if (drawBrush != null)
                 {
-                    drawingContext.DrawEllipse(drawBrush, null, this.SkeletonPointToScreen(joint.Position), JointThickness, JointThickness);
+                    drawingContext.DrawEllipse(drawBrush, null, SkeletonPointToScreen(joint.Position), JointThickness, JointThickness);
                 }
             }
         }
@@ -330,7 +328,7 @@ namespace NAO_Kinect
         {
             // Convert point to depth space.  
             // We are not using depth directly, but we do want the points in our 640x480 output resolution.
-            DepthImagePoint depthPoint = this.sensor.CoordinateMapper.MapSkeletonPointToDepthPoint(skelpoint, DepthImageFormat.Resolution640x480Fps30);
+            DepthImagePoint depthPoint = sensor.CoordinateMapper.MapSkeletonPointToDepthPoint(skelpoint, DepthImageFormat.Resolution640x480Fps30);
             return new Point(depthPoint.X, depthPoint.Y);
         }
 
@@ -364,13 +362,13 @@ namespace NAO_Kinect
             }
 
             // We assume all drawn bones are inferred unless BOTH joints are tracked
-            Pen drawPen = this.inferredBonePen;
+            var drawPen = inferredBonePen;
             if (joint0.TrackingState == JointTrackingState.Tracked && joint1.TrackingState == JointTrackingState.Tracked)
             {
-                drawPen = this.trackedBonePen;
+                drawPen = trackedBonePen;
             }
 
-            drawingContext.DrawLine(drawPen, this.SkeletonPointToScreen(joint0.Position), this.SkeletonPointToScreen(joint1.Position));
+            drawingContext.DrawLine(drawPen, SkeletonPointToScreen(joint0.Position), SkeletonPointToScreen(joint1.Position));
         }
 
         /// <summary>
@@ -378,7 +376,7 @@ namespace NAO_Kinect
         /// </summary>
         private void OnNewFrame()
         {
-            var handler = this.NewFrame;
+            var handler = NewFrame;
             if (handler != null)
             {
                 handler(this, EventArgs.Empty);
@@ -391,7 +389,7 @@ namespace NAO_Kinect
         /// <returns> current frame </returns>
         public DrawingImage getImage()
         {
-            return this.imageSource;
+            return imageSource;
         }
 
         /// <summary>

@@ -1,47 +1,41 @@
-﻿/**
+﻿/*
  * This software was developed by Austin Hughes
- * Last Modified: 2013-08-31
+ * Last Modified: 2014-08-20
  */
 
+// System Imports
 using System;
-using System.Collections.Generic;
-using System.Threading;
 using System.Windows;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Controls;
-using System.Windows.Shapes;
-using System.Windows.Threading;
-using Microsoft.Speech.AudioFormat;
-using Microsoft.Speech.Recognition;
+using System.Windows.Controls.Primitives;
+
+// Microsoft SDK Imports
 using Microsoft.Kinect;
-using NAO_Camera_WPF;
 
 namespace NAO_Kinect
 {
     /// <summary>
     /// Interaction logic for MainWindow.xaml
     /// </summary>
-    public partial class MainWindow : Window
+    public partial class MainWindow
     {
         /// <summary>
-        /// Active Kinect sensor.
+        /// Active Kinect sensor
         /// </summary>
         private KinectSensor sensor;
 
         /// <summary>
         /// Class declarations
         /// </summary>
-        private Motion naoMotion = null;
-        private KinectVoice kinectVoice = null;
-        private KinectSkeleton kinectSkeleton = null;
-        private SkeletonAngles skeletonAngles = null;
+        private Motion naoMotion;
+        private KinectVoice kinectVoice;
+        private KinectSkeleton kinectSkeleton;
+        private SkeletonAngles skeletonAngles;
 
         /// <summary>
         /// Variables for calibrating and sending angles to NAO
         /// </summary>
-        private bool calibrated = false;
-        private bool changeAngles = false;
+        private bool calibrated;
+        private bool changeAngles;
         private float[] calibrationAngles = new float[6];
         private float[] oldAngles = new float[6];
 
@@ -57,39 +51,31 @@ namespace NAO_Kinect
         }
 
         /// <summary>
-        /// 
+        /// Event handler for the main UI being loaded
         /// </summary>
-        /// <param name="sender"></param>
-        /// <param name="e"></param>
+        /// <param name="sender"> object that generated the event </param>
+        /// <param name="e"> any additional arguments </param>
         private void MainWindow_Loaded(object sender, RoutedEventArgs e)
         {
-            // Look through all sensors and save the first one
-            foreach (var potentialSensor in KinectSensor.KinectSensors)
-            {
-                if (potentialSensor.Status == KinectStatus.Connected)
-                {
-                    this.sensor = potentialSensor;
-                    break;
-                }
-            }
+            // Get the Kinect Sensor
+            sensor = KinectSensor.GetDefault();
 
-            //Try to start sensor
             try
             {
-                this.sensor.Start();
+                sensor.Open();
             }
-            catch (NullReferenceException)  // If fails, then set sensor to null
+            catch (Exception)
             {
-                this.sensor = null;
+                sensor = null;
             }
 
             // Send the sensor to the voice class and setup the event handler
             kinectVoice = new KinectVoice(sensor);
-            kinectVoice.SpeechEvent += new EventHandler(kinectVoice_NewSpeech);
+            kinectVoice.SpeechEvent += kinectVoice_NewSpeech;
 
             // Send the sensor to the skeleton class and setup the event handler
             kinectSkeleton = new KinectSkeleton(sensor);
-            kinectSkeleton.NewFrame += new EventHandler(kinectSkeleton_NewFrame);
+            kinectSkeleton.NewFrame += kinectSkeleton_NewFrame;
 
             // starts the skeletonAngles class and sends to kinectSkeleton reference to it
             skeletonAngles = new SkeletonAngles(kinectSkeleton);
@@ -105,10 +91,9 @@ namespace NAO_Kinect
         /// <param name="e"> any additional arguments </param>
         private void MainWindow_Unloaded(object sender, RoutedEventArgs e)
         {
-            if (this.sensor != null)
+            if (sensor != null)
             {
-                this.sensor.Stop();         // Stops the sensor from preforming actions
-                this.sensor.Dispose();      // Ensures sensor removed from memory
+                sensor.Close();
             }
         }
 
@@ -120,22 +105,22 @@ namespace NAO_Kinect
         private void kinectSkeleton_NewFrame(object sender, EventArgs e)
         {
             // flag for updating angles
-            bool update = false;
+            var update = false;
 
             // gets the image from kinectSkeleton class and updates the image in the program
             Image.Source = kinectSkeleton.getImage();
 
             // gets calculated angles
-            float[] angles = skeletonAngles.getAngles();
+            var angles = skeletonAngles.getAngles();
 
             // updates angles with calibration
-            float[] finalAngles = new float[6];
+            var finalAngles = new float[6];
 
             // checks for calibration flag and then updates calibration
             if (calibrated == false)
             {
                 // only using 2 of 6 possible angles right now
-                for (int x = 0; x < 4; x++)
+                for (var x = 0; x < 4; x++)
                 {
                     calibrationAngles[x] = angles[x];
                 }
@@ -143,7 +128,7 @@ namespace NAO_Kinect
             }
   
             // generate calibrated angles
-            for (int x = 0; x < 4; x++)
+            for (var x = 0; x < 4; x++)
             {
                 finalAngles[x] = angles[x] - calibrationAngles[x]; // adjustment to work with NAO robot angles
             }
@@ -155,7 +140,7 @@ namespace NAO_Kinect
             debug1.Text += "Angle 4: " + angles[3];
 
             // check that angles have changed enough to move motors
-            for (int x = 0; x < 2; x++)
+            for (var x = 0; x < 2; x++)
             {
                 // if block to send angles to NAO and makes sure they are not out of bound
                 if (changeAngles && (Math.Abs(oldAngles[0]) - Math.Abs(finalAngles[0]) > .1 || Math.Abs(oldAngles[0]) - Math.Abs(finalAngles[0]) < .1))
@@ -248,9 +233,9 @@ namespace NAO_Kinect
         private void kinectVoice_NewSpeech(object sender, EventArgs e)
         {
             // variables for heard speech, final speech result, and confidence
-            string result = kinectVoice.getResult();
-            string semanticResult = kinectVoice.getSemanticResult();
-            float confidence = kinectVoice.getConfidence();
+            var result = kinectVoice.getResult();
+            var semanticResult = kinectVoice.getSemanticResult();
+            var confidence = kinectVoice.getConfidence();
 
             if (confidence > 0.6) //If confidence of recognized speech is greater than 60%
             {
@@ -258,14 +243,14 @@ namespace NAO_Kinect
                 debug2.Text = "Recognized: " + result + " \nConfidence: " + confidence;
 
                 // if statements to preform actions based on results
-                if (semanticResult == "on" && startButton.IsEnabled == true)
+                if (semanticResult == "on" && startButton.IsEnabled)
                 {
-                    startButton.RaiseEvent(new RoutedEventArgs(System.Windows.Controls.Button.ClickEvent));
+                    startButton.RaiseEvent(new RoutedEventArgs(ButtonBase.ClickEvent));
                 }
 
-                if (semanticResult == "off" && stopButton.IsEnabled == true)
+                if (semanticResult == "off" && stopButton.IsEnabled)
                 {
-                    stopButton.RaiseEvent(new RoutedEventArgs(System.Windows.Controls.Button.ClickEvent));
+                    stopButton.RaiseEvent(new RoutedEventArgs(ButtonBase.ClickEvent));
                 }
 
                 if (semanticResult == "calibrate")
@@ -305,17 +290,6 @@ namespace NAO_Kinect
 
             stopButton.IsEnabled = false;
             startButton.IsEnabled = true;
-        }
-
-        /// <summary>
-        /// event handler for slider changing, updates kinect angle
-        /// </summary>
-        /// <param name="sender"> object that called the event </param>
-        /// <param name="e"> any additional arguments </param>
-        private void angleSlider_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
-        {
-           //******* NOT YET IMPLEMENTED **********
-           // this.sensor.ElevationAngle = (int) angleSlider.Value;
         }
     }
 }
