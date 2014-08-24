@@ -59,6 +59,9 @@ namespace NAO_Kinect
         private List<Tuple<JointType, JointType>> bones;
         private List<Pen> bodyColors;
 
+        /// <summary>
+        /// Event handler for new Kinect frames
+        /// </summary>
         public event EventHandler NewFrame;
 
         /// <summary>
@@ -69,65 +72,100 @@ namespace NAO_Kinect
             // set kinect sensor
             sensor = kinect;
 
+            // get the coordinate mapper
+            coordinateMapper = sensor.CoordinateMapper;
+
+            // get the depth (display) extents
+            FrameDescription frameDescription = sensor.DepthFrameSource.FrameDescription;
+
+            // get size of joint space
+            displayWidth = frameDescription.Width;
+            displayHeight = frameDescription.Height;
+
+            // a bone defined as a line between two joints
+            bones = new List<Tuple<JointType, JointType>>
+                {
+                    // Torso
+                    new Tuple<JointType, JointType>(JointType.Head, JointType.Neck),
+                    new Tuple<JointType, JointType>(JointType.Neck, JointType.SpineShoulder),
+                    new Tuple<JointType, JointType>(JointType.SpineShoulder, JointType.SpineMid),
+                    new Tuple<JointType, JointType>(JointType.SpineMid, JointType.SpineBase),
+                    new Tuple<JointType, JointType>(JointType.SpineShoulder, JointType.ShoulderRight),
+                    new Tuple<JointType, JointType>(JointType.SpineShoulder, JointType.ShoulderLeft),
+                    new Tuple<JointType, JointType>(JointType.SpineBase, JointType.HipRight),
+                    new Tuple<JointType, JointType>(JointType.SpineBase, JointType.HipLeft),
+
+                    // Right Arm
+                    new Tuple<JointType, JointType>(JointType.ShoulderRight, JointType.ElbowRight),
+                    new Tuple<JointType, JointType>(JointType.ElbowRight, JointType.WristRight),
+                    new Tuple<JointType, JointType>(JointType.WristRight, JointType.HandRight),
+                    new Tuple<JointType, JointType>(JointType.HandRight, JointType.HandTipRight),
+                    new Tuple<JointType, JointType>(JointType.WristRight, JointType.ThumbRight),
+
+                    // Left Arm
+                    new Tuple<JointType, JointType>(JointType.ShoulderLeft, JointType.ElbowLeft),
+                    new Tuple<JointType, JointType>(JointType.ElbowLeft, JointType.WristLeft),
+                    new Tuple<JointType, JointType>(JointType.WristLeft, JointType.HandLeft),
+                    new Tuple<JointType, JointType>(JointType.HandLeft, JointType.HandTipLeft),
+                    new Tuple<JointType, JointType>(JointType.WristLeft, JointType.ThumbLeft),
+
+                    // Right Leg
+                    new Tuple<JointType, JointType>(JointType.HipRight, JointType.KneeRight),
+                    new Tuple<JointType, JointType>(JointType.KneeRight, JointType.AnkleRight),
+                    new Tuple<JointType, JointType>(JointType.AnkleRight, JointType.FootRight),
+
+                    // Left Leg
+                    new Tuple<JointType, JointType>(JointType.HipLeft, JointType.KneeLeft),
+                    new Tuple<JointType, JointType>(JointType.KneeLeft, JointType.AnkleLeft),
+                    new Tuple<JointType, JointType>(JointType.AnkleLeft, JointType.FootLeft)
+                };
+
+            // populate body colors, one for each BodyIndex
+            bodyColors = new List<Pen>();
+
+            bodyColors.Add(new Pen(Brushes.Red, 6));
+            bodyColors.Add(new Pen(Brushes.Orange, 6));
+            bodyColors.Add(new Pen(Brushes.Green, 6));
+            bodyColors.Add(new Pen(Brushes.Blue, 6));
+            bodyColors.Add(new Pen(Brushes.Indigo, 6));
+            bodyColors.Add(new Pen(Brushes.Violet, 6));
+
             // Create the drawing group we'll use for drawing
             drawingGroup = new DrawingGroup();
 
             // Create an image source that we can use in our image control
             imageSource = new DrawingImage(drawingGroup);
 
+
             // start the skeleton stream
-            startSkeletonStream();
+            startBodyStream();
         }
 
         /// <summary>
         /// Starts the Skeleton Stream
         /// If audio was started, restart it after starting skeleton stream
         /// </summary>
-        /// <param name="sender">object sending the event</param>
-        /// <param name="e">event arguments</param>
-        public void startSkeletonStream()
+        public void startBodyStream()
         {
             try
             {
-                // paramaters to smooth input
-                var smoothingParam = new TransformSmoothParameters();
-                {
-                    smoothingParam.Smoothing = 0.5f;
-                    smoothingParam.Correction = 0.1f;
-                    smoothingParam.Prediction = 0.5f;
-                    smoothingParam.JitterRadius = 0.1f;
-                    smoothingParam.MaxDeviationRadius = 0.1f;
-                };
-
-                // Enable skeletal tracking
-                sensor.SkeletonStream.Enable(smoothingParam);
-
-                // Allocate Skeleton Stream data
-                skeletonData = new Skeleton[sensor.SkeletonStream.FrameSkeletonArrayLength];
-
-                // Get Ready for Skeleton Ready Events
-                sensor.SkeletonFrameReady += new EventHandler<SkeletonFrameReadyEventArgs>(kinect_SkeletonFrameReady);
-
-                // Ensure AppChoosesSkeletons is set, lets us only track the skeleton we want
-                if (!sensor.SkeletonStream.AppChoosesSkeletons)
-                {
-                    sensor.SkeletonStream.AppChoosesSkeletons = true; 
-                }
+                // open the reader for the body frames
+                bodyFrameReader = sensor.BodyFrameSource.OpenReader();
             }
             catch (Exception)
             {
-                MessageBox.Show("Error starting skeleton stream.");
+                MessageBox.Show("Error starting body stream.");
             }
         }
 
         /// <summary>
         /// Disables the skeleton stream
         /// </summary>
-        public void stopSkeletonStream()
+        public void stopBodyStream()
         {
             if (null != sensor)
             {
-                sensor.SkeletonStream.Disable();
+                bodyFrameReader.Dispose();
             }
         }
 
