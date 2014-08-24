@@ -14,7 +14,7 @@ using Microsoft.Kinect;
 
 namespace NAO_Kinect
 {
-    class KinectSkeleton
+    class KinectBody
     {
         /// <summary>
         /// Variables used for drawing skeleton on screen
@@ -38,22 +38,22 @@ namespace NAO_Kinect
         private KinectSensor sensor;
 
         /// <summary>
-        /// Array of data for skeleton joints.
+        /// Array of data for vody joints.
         /// </summary>
-        private Skeleton[] skeletonData;
+        private Body[] bodyData;
 
         /// <summary>
-        /// The currently tracked skeleton
+        /// The currently tracked body
         /// </summary>
-        private Skeleton trackedSkeleton = null;
+        private Body trackedBody = null;
 
         /// <summary>
-        /// event handler for updated skeleton image
+        /// event handler for updated body image
         /// </summary>
         public event EventHandler NewFrame;
 
         /// <summary>
-        /// Variables for tracking closest skeleton
+        /// Variables for tracking closest body
         /// </summary>
         private float closestDistance = 10000f; // Start with a far enough distance
         private int closestID;
@@ -61,7 +61,7 @@ namespace NAO_Kinect
         /// <summary>
         /// Class constructor
         /// </summary>
-        public KinectSkeleton(KinectSensor kinect)
+        public KinectBody(KinectSensor kinect)
         {
             // set kinect sensor
             sensor = kinect;
@@ -396,9 +396,9 @@ namespace NAO_Kinect
         /// returns the currently tracked skeleton
         /// </summary>
         /// <returns> tracked skeleton </returns>
-        public Skeleton getSkeleton()
+        public Body getBody()
         {
-            return trackedSkeleton;
+            return trackedBody;
         }
     }
 }

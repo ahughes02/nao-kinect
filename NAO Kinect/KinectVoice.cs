@@ -6,6 +6,7 @@
 // System imports
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Windows;
 
 // Microsoft imports
@@ -104,7 +105,7 @@ namespace NAO_Kinect
                 sre.SpeechRecognized += SpeechRecognized;
 
                 IReadOnlyList<AudioBeam> audioBeamList = sensor.AudioSource.AudioBeams;
-                System.IO.Stream audioStream = audioBeamList[0].OpenInputStream();
+                Stream audioStream = audioBeamList[0].OpenInputStream();
 
                 // Tells the speech engine where to find the audio stream
                 sre.SetInputToAudioStream(audioStream, new SpeechAudioFormatInfo(EncodingFormat.Pcm, 16000, 16, 1, 32000, 2, null));

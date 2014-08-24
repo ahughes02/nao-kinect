@@ -28,7 +28,7 @@ namespace NAO_Kinect
         /// </summary>
         private Motion naoMotion;
         private KinectVoice kinectVoice;
-        private KinectSkeleton kinectSkeleton;
+        private KinectBody kinectSkeleton;
         private SkeletonAngles skeletonAngles;
 
         /// <summary>
@@ -74,7 +74,7 @@ namespace NAO_Kinect
             kinectVoice.SpeechEvent += kinectVoice_NewSpeech;
 
             // Send the sensor to the skeleton class and setup the event handler
-            kinectSkeleton = new KinectSkeleton(sensor);
+            kinectSkeleton = new KinectBody(sensor);
             kinectSkeleton.NewFrame += kinectSkeleton_NewFrame;
 
             // starts the skeletonAngles class and sends to kinectSkeleton reference to it

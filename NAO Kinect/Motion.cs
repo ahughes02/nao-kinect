@@ -23,6 +23,12 @@ namespace NAO_Kinect
         /// <param name="ip"> ip address of the robot </param>
         public void connect(string ip)
         {
+            // Make sure the standard output directory exists
+            if (!Directory.Exists("C:\\NAO Motion\\"))
+            {
+                Directory.CreateDirectory("C:\\NAO Motion\\");
+            }
+
             try
             {
                 naoMotion = new MotionProxy(ip, 9559);
@@ -34,8 +40,8 @@ namespace NAO_Kinect
             }
             catch (Exception e)
             {
-                MessageBox.Show("Exception occurred, error log in C:\\NAOcam\\exception.txt");
-                File.WriteAllText(@"C:\\NAOcam\\exception.txt", e.ToString()); // write exepctions to text file
+                MessageBox.Show("Exception occurred, error log in C:\\NAO Motion\\exception.txt");
+                File.WriteAllText(@"C:\\NAO Motion\\exception.txt", e.ToString()); // write exepctions to text file
             }
         }
 
@@ -59,8 +65,8 @@ namespace NAO_Kinect
             catch (Exception e)
             {
                 // display error message and write exceptions to a file
-                MessageBox.Show("Exception occurred, error log in C:\\NAOcam\\exception.txt");
-                File.WriteAllText(@"C:\\NAOcam\\exception.txt", e.ToString());
+                MessageBox.Show("Exception occurred, error log in C:\\NAO Motion\\exception.txt");
+                File.WriteAllText(@"C:\\NAO Motion\\exception.txt", e.ToString());
             }
         }
 
@@ -77,8 +83,8 @@ namespace NAO_Kinect
             catch (Exception e)
             {
                 // display error message and write exceptions to a file
-                MessageBox.Show("Exception occurred, error log in C:\\NAOcam\\exception.txt");
-                File.WriteAllText(@"C:\\NAOcam\\exception.txt", e.ToString());
+                MessageBox.Show("Exception occurred, error log in C:\\NAO Motion\\exception.txt");
+                File.WriteAllText(@"C:\\NAO Motion\\exception.txt", e.ToString());
             }
         }
 
@@ -95,8 +101,8 @@ namespace NAO_Kinect
             catch (Exception e)
             {
                 // display error message and write exceptions to a file
-                MessageBox.Show("Exception occurred, error log in C:\\NAOcam\\exception.txt");
-                File.WriteAllText(@"C:\\NAOcam\\exception.txt", e.ToString());
+                MessageBox.Show("Exception occurred, error log in C:\\NAO Motion\\exception.txt");
+                File.WriteAllText(@"C:\\NAO Motion\\exception.txt", e.ToString());
             }
         }
 
@@ -116,8 +122,8 @@ namespace NAO_Kinect
             catch (Exception e)
             {
                 // display error message and write exceptions to a file
-                MessageBox.Show("Exception occurred, error log in C:\\NAOcam\\exception.txt");
-                File.WriteAllText(@"C:\\NAOcam\\exception.txt", e.ToString());
+                MessageBox.Show("Exception occurred, error log in C:\\NAO Motion\\exception.txt");
+                File.WriteAllText(@"C:\\NAO Motion\\exception.txt", e.ToString());
             }
 
             return -1;
@@ -137,8 +143,8 @@ namespace NAO_Kinect
             catch (Exception e)
             {
                 // display error message and write exceptions to a file
-                MessageBox.Show("Exception occurred, error log in C:\\NAOcam\\exception.txt");
-                File.WriteAllText(@"C:\\NAOcam\\exception.txt", e.ToString());
+                MessageBox.Show("Exception occurred, error log in C:\\NAO Motion\\exception.txt");
+                File.WriteAllText(@"C:\\NAO Motion\\exception.txt", e.ToString());
             }
         }
     }

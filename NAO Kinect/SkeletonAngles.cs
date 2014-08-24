@@ -16,16 +16,17 @@ namespace NAO_Kinect
         /// <summary>
         /// Holds the skeleton class and the skeleton we want angles for
         /// </summary>
-        private KinectSkeleton kinectSkeleton;
-        private Skeleton trackedSkeleton = null;
+        private KinectBody kinectBody;
+        private Body trackedBody = null;
+        //private Skeleton trackedSkeleton = null;
 
         /// <summary>
         /// Class constructor
         /// </summary>
         /// <param name="skeletonClass"> reference to current skeleton class </param>
-        public SkeletonAngles(KinectSkeleton skeletonClass)
+        public SkeletonAngles(KinectBody bodyClass)
         {
-            kinectSkeleton = skeletonClass;
+            kinectBody = bodyClass;
         }
 
         /// <summary>
@@ -34,34 +35,37 @@ namespace NAO_Kinect
         /// <returns> array of useful angles </returns>
         public float[] getAngles()
         {
-            trackedSkeleton = kinectSkeleton.getSkeleton();
+            trackedBody = kinectBody.getBody();
 
             var angles = new float[6];
 
-            if (trackedSkeleton != null)
+            if (trackedBody != null)
             {
                 // get X and Y coordinates of the left and right wrists
-                float wlY = trackedSkeleton.Joints[JointType.WristLeft].Position.Y;
-                float wlX = trackedSkeleton.Joints[JointType.WristLeft].Position.X;
-                float wrY = trackedSkeleton.Joints[JointType.WristRight].Position.Y;
-                float wrX = trackedSkeleton.Joints[JointType.WristRight].Position.X;
+                float wlY = trackedBody.Joints[JointType.WristLeft].Position.Y;
+                float wlX = trackedBody.Joints[JointType.WristLeft].Position.X;
+                float wrY = trackedBody.Joints[JointType.WristRight].Position.Y;
+                float wrX = trackedBody.Joints[JointType.WristRight].Position.X;
 
-                float scX = trackedSkeleton.Joints[JointType.ShoulderCenter].Position.X;
-                float scY = trackedSkeleton.Joints[JointType.ShoulderCenter].Position.Y;
+                // These joints are not in Kinect 2.0
+                //float scX = trackedBody.Joints[JointType.ShoulderCenter].Position.X;
+                //float scY = trackedBody.Joints[JointType.ShoulderCenter].Position.Y;
 
-                float elX = trackedSkeleton.Joints[JointType.ElbowLeft].Position.X;
-                float elY = trackedSkeleton.Joints[JointType.ElbowLeft].Position.Y;
+                float elX = trackedBody.Joints[JointType.ElbowLeft].Position.X;
+                float elY = trackedBody.Joints[JointType.ElbowLeft].Position.Y;
 
-                float erX = trackedSkeleton.Joints[JointType.ElbowRight].Position.X;
-                float erY = trackedSkeleton.Joints[JointType.ElbowRight].Position.Y;
+                float erX = trackedBody.Joints[JointType.ElbowRight].Position.X;
+                float erY = trackedBody.Joints[JointType.ElbowRight].Position.Y;
 
-                float spX = trackedSkeleton.Joints[JointType.Spine].Position.X;
-                float spY = trackedSkeleton.Joints[JointType.Spine].Position.Y;
+                // These joints are not in Kinect 2.0
+                //float spX = trackedBody.Joints[JointType.Spine].Position.X;
+                //float spY = trackedBody.Joints[JointType.Spine].Position.Y;
 
-                angles[0] = angleCalc(scX, scY, spX, spY, erX, erY);
-                angles[1] = angleCalc(scX, scY, spX, spY, elX, elY);
-                angles[2] = angleCalc(elX, elY, wlX, wlY, scX, scY);
-                angles[3] = angleCalc(erX, erY, wrX, wrY, scX, scY);
+                // Disable angleCalc until joints are found for Kinect 2.0
+                //angles[0] = angleCalc(scX, scY, spX, spY, erX, erY);
+                //angles[1] = angleCalc(scX, scY, spX, spY, elX, elY);
+                //angles[2] = angleCalc(elX, elY, wlX, wlY, scX, scY);
+                //angles[3] = angleCalc(erX, erY, wrX, wrY, scX, scY);
             }
 
             return angles;
@@ -79,13 +83,11 @@ namespace NAO_Kinect
         /// <returns> angle calculated </returns>
         private float angleCalc(float p1X, float p1Y, float p2X, float p2Y, float p3X, float p3Y)
         {
-            float angle = 0;
-
             var p12 = (float)Math.Sqrt(((p1X - p2X) * (p1X - p2X)) + ((p1Y - p2Y) * (p1Y - p2Y)));
             var p13 = (float)Math.Sqrt(((p1X - p3X) * (p1X - p3X)) + ((p1Y - p3Y) * (p1Y - p3Y)));
             var p23 = (float)Math.Sqrt(((p2X - p3X) * (p2X - p3X)) + ((p2Y - p3Y) * (p2Y - p3Y)));
 
-            return angle = (float)Math.Acos(((p12 * p12) + (p13 * p13) - (p23 * p23)) / (2 * p12 * p13));
+            return (float)Math.Acos(((p12 * p12) + (p13 * p13) - (p23 * p23)) / (2 * p12 * p13));
         }
     }
 }
