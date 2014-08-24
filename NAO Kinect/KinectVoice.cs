@@ -16,6 +16,9 @@ using Microsoft.Kinect;
 
 namespace NAO_Kinect
 {
+    /// <summary>
+    /// This class handles processing voice events from the Kinect
+    /// </summary>
     class KinectVoice
     {
         /// <summary>

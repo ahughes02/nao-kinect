@@ -10,7 +10,7 @@
         <TextBlock x:Name="debug1" HorizontalAlignment="Left" Height="386" Margin="661,31,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="206"/>
         <Label x:Name="Debug_Label" Content="Debug Output" HorizontalAlignment="Left" Height="27" Margin="661,4,0,0" VerticalAlignment="Top" Width="89"/>
         <TextBlock x:Name="debug2" HorizontalAlignment="Left" Height="114" Margin="661,422,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="206"/>
-        <TextBox x:Name="ipBox" HorizontalAlignment="Left" Height="19" Margin="10,32,0,0" TextWrapping="Wrap" Text="69.88.163.51" VerticalAlignment="Top" Width="100"/>
+        <TextBox x:Name="ipBox" HorizontalAlignment="Left" Height="19" Margin="10,32,0,0" TextWrapping="Wrap" Text="69.88.163.32" VerticalAlignment="Top" Width="100"/>
         <Label Content="NAO IP:" HorizontalAlignment="Left" Margin="5,6,0,0" VerticalAlignment="Top"/>
 
     </Grid>

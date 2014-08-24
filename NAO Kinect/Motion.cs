@@ -13,6 +13,9 @@ using Aldebaran.Proxies;
 
 namespace NAO_Kinect
 {
+    /// <summary>
+    /// This class handles communication with the NAO robot motors
+    /// </summary>
     class Motion
     {
         MotionProxy naoMotion;

@@ -14,7 +14,7 @@ using Microsoft.Kinect;
 namespace NAO_Kinect
 {
     /// <summary>
-    /// Interaction logic for MainWindow.xaml
+    /// This class handles all the UI logic for the application
     /// </summary>
     public partial class MainWindow
     {
@@ -29,7 +29,7 @@ namespace NAO_Kinect
         private Motion naoMotion;
         private KinectVoice kinectVoice;
         private KinectBody kinectSkeleton;
-        private SkeletonAngles skeletonAngles;
+        private BodyAngles skeletonAngles;
 
         /// <summary>
         /// Variables for calibrating and sending angles to NAO
@@ -78,7 +78,7 @@ namespace NAO_Kinect
             kinectSkeleton.NewFrame += kinectSkeleton_NewFrame;
 
             // starts the skeletonAngles class and sends to kinectSkeleton reference to it
-            skeletonAngles = new SkeletonAngles(kinectSkeleton);
+            skeletonAngles = new BodyAngles(kinectSkeleton);
 
             // enables voice reconginition
             kinectVoice.startVoiceRecognition();

@@ -11,20 +11,22 @@ using Microsoft.Kinect;
 
 namespace NAO_Kinect
 {
-    class SkeletonAngles
+    /// <summary>
+    /// This class takes a tracked body and generates the angles between joints
+    /// </summary>
+    class BodyAngles
     {
         /// <summary>
-        /// Holds the skeleton class and the skeleton we want angles for
+        /// Holds the skeleton class and the body we want angles for
         /// </summary>
         private KinectBody kinectBody;
         private Body trackedBody;
-        //private Skeleton trackedSkeleton = null;
 
         /// <summary>
         /// Class constructor
         /// </summary>
         /// <param name="bodyClass"> reference to current skeleton class </param>
-        public SkeletonAngles(KinectBody bodyClass)
+        public BodyAngles(KinectBody bodyClass)
         {
             kinectBody = bodyClass;
         }

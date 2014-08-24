@@ -15,6 +15,10 @@ using Microsoft.Kinect;
 
 namespace NAO_Kinect
 {
+    /// <summary>
+    /// This class handles processing the Kinect Body frames
+    /// and drawing the body skeleton on an image for display
+    /// </summary>
     class KinectBody
     {
         /// <summary>
