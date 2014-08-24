@@ -5,7 +5,8 @@
 
 // System imports
 using System;
-using System.Linq;
+using System.Collections.Generic;
+using System.ComponentModel;
 using System.Windows;
 using System.Windows.Media;
 
@@ -17,35 +18,55 @@ namespace NAO_Kinect
     class KinectBody
     {
         /// <summary>
-        /// Variables used for drawing skeleton on screen
+        /// Drawing variables
         /// </summary>
-        private const float RenderWidth = 640.0f;
-        private const float RenderHeight = 480.0f;
+        private const double HandSize = 30;
         private const double JointThickness = 3;
-        private const double BodyCenterThickness = 10;
         private const double ClipBoundsThickness = 10;
-        private readonly Brush centerPointBrush = Brushes.Blue;
-        private readonly Brush trackedJointBrush = new SolidColorBrush(Color.FromArgb(255, 68, 192, 68));
-        private readonly Brush inferredJointBrush = Brushes.Yellow;
-        private readonly Pen trackedBonePen = new Pen(Brushes.Green, 6);
+        private const float InferredZPositionClamp = 0.1f;
+        private readonly Brush handClosedBrush = new SolidColorBrush(Color.FromArgb(128, 255, 0, 0));
+        private readonly Brush handOpenBrush = new SolidColorBrush(Color.FromArgb(128, 0, 255, 0));
+        private readonly Brush handLassoBrush = new SolidColorBrush(Color.FromArgb(128, 0, 0, 255));
+        private readonly Brush trackedJointBrush = new SolidColorBrush(Color.FromArgb(255, 68, 192, 68));  
+        private readonly Brush inferredJointBrush = Brushes.Yellow;   
         private readonly Pen inferredBonePen = new Pen(Brushes.Gray, 1);
         private DrawingGroup drawingGroup;
         private DrawingImage imageSource;
 
         /// <summary>
-        /// Active Kinect sensor.
+        /// Coordinate mapper to map one type of point to another
         /// </summary>
-        private KinectSensor sensor;
+        private CoordinateMapper coordinateMapper = null;
 
         /// <summary>
-        /// Array of data for vody joints.
+        /// Reader for body frames
         /// </summary>
-        private Body[] bodyData;
+        private BodyFrameReader bodyFrameReader = null;
 
         /// <summary>
-        /// The currently tracked body
+        /// Width of display (depth space)
         /// </summary>
-        private Body trackedBody = null;
+        private int displayWidth;
+
+        /// <summary>
+        /// Height of display (depth space)
+        /// </summary>
+        private int displayHeight;
+
+        /// <summary>
+        /// Array for the bodies
+        /// </summary>
+        private Body[] bodies = null;
+
+        /// <summary>
+        /// definition of bones
+        /// </summary>
+        private List<Tuple<JointType, JointType>> bones;
+
+        /// <summary>
+        /// List of colors for each body tracked
+        /// </summary>
+        private List<Pen> bodyColors;
 
         /// <summary>
         /// event handler for updated body image
@@ -53,10 +74,9 @@ namespace NAO_Kinect
         public event EventHandler NewFrame;
 
         /// <summary>
-        /// Variables for tracking closest body
+        /// Active Kinect sensor
         /// </summary>
-        private float closestDistance = 10000f; // Start with a far enough distance
-        private int closestID;
+        private KinectSensor sensor;
 
         /// <summary>
         /// Class constructor

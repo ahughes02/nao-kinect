@@ -17,13 +17,13 @@ namespace NAO_Kinect
         /// Holds the skeleton class and the skeleton we want angles for
         /// </summary>
         private KinectBody kinectBody;
-        private Body trackedBody = null;
+        private Body trackedBody;
         //private Skeleton trackedSkeleton = null;
 
         /// <summary>
         /// Class constructor
         /// </summary>
-        /// <param name="skeletonClass"> reference to current skeleton class </param>
+        /// <param name="bodyClass"> reference to current skeleton class </param>
         public SkeletonAngles(KinectBody bodyClass)
         {
             kinectBody = bodyClass;
@@ -48,8 +48,8 @@ namespace NAO_Kinect
                 float wrX = trackedBody.Joints[JointType.WristRight].Position.X;
 
                 // These joints are not in Kinect 2.0
-                //float scX = trackedBody.Joints[JointType.ShoulderCenter].Position.X;
-                //float scY = trackedBody.Joints[JointType.ShoulderCenter].Position.Y;
+                float scX = trackedBody.Joints[JointType.SpineShoulder].Position.X;
+                float scY = trackedBody.Joints[JointType.SpineShoulder].Position.Y;
 
                 float elX = trackedBody.Joints[JointType.ElbowLeft].Position.X;
                 float elY = trackedBody.Joints[JointType.ElbowLeft].Position.Y;
@@ -58,14 +58,14 @@ namespace NAO_Kinect
                 float erY = trackedBody.Joints[JointType.ElbowRight].Position.Y;
 
                 // These joints are not in Kinect 2.0
-                //float spX = trackedBody.Joints[JointType.Spine].Position.X;
-                //float spY = trackedBody.Joints[JointType.Spine].Position.Y;
+                float spX = trackedBody.Joints[JointType.SpineBase].Position.X;
+                float spY = trackedBody.Joints[JointType.SpineBase].Position.Y;
 
                 // Disable angleCalc until joints are found for Kinect 2.0
-                //angles[0] = angleCalc(scX, scY, spX, spY, erX, erY);
-                //angles[1] = angleCalc(scX, scY, spX, spY, elX, elY);
-                //angles[2] = angleCalc(elX, elY, wlX, wlY, scX, scY);
-                //angles[3] = angleCalc(erX, erY, wrX, wrY, scX, scY);
+                angles[0] = angleCalc(scX, scY, spX, spY, erX, erY);
+                angles[1] = angleCalc(scX, scY, spX, spY, elX, elY);
+                angles[2] = angleCalc(elX, elY, wlX, wlY, scX, scY);
+                angles[3] = angleCalc(erX, erY, wrX, wrY, scX, scY);
             }
 
             return angles;
