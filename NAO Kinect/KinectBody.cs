@@ -22,6 +22,22 @@ namespace NAO_Kinect
     class KinectBody
     {
         /// <summary>
+        /// Active Kinect sensor
+        /// </summary>
+        private KinectSensor sensor;
+
+        private int displayWidth;
+        private int displayHeight;
+
+        private BodyFrameReader bodyFrameReader = null;
+        private CoordinateMapper coordinateMapper = null;
+
+        /// <summary>
+        /// Arrays
+        /// </summary>
+        private Body[] bodies = null;
+        
+        /// <summary>
         /// Drawing variables
         /// </summary>
         private const double HandSize = 30;
@@ -38,49 +54,12 @@ namespace NAO_Kinect
         private DrawingImage imageSource;
 
         /// <summary>
-        /// Coordinate mapper to map one type of point to another
-        /// </summary>
-        private CoordinateMapper coordinateMapper = null;
-
-        /// <summary>
-        /// Reader for body frames
-        /// </summary>
-        private BodyFrameReader bodyFrameReader = null;
-
-        /// <summary>
-        /// Width of display (depth space)
-        /// </summary>
-        private int displayWidth;
-
-        /// <summary>
-        /// Height of display (depth space)
-        /// </summary>
-        private int displayHeight;
-
-        /// <summary>
-        /// Array for the bodies
-        /// </summary>
-        private Body[] bodies = null;
-
-        /// <summary>
-        /// definition of bones
+        /// Lists
         /// </summary>
         private List<Tuple<JointType, JointType>> bones;
-
-        /// <summary>
-        /// List of colors for each body tracked
-        /// </summary>
         private List<Pen> bodyColors;
 
-        /// <summary>
-        /// event handler for updated body image
-        /// </summary>
         public event EventHandler NewFrame;
-
-        /// <summary>
-        /// Active Kinect sensor
-        /// </summary>
-        private KinectSensor sensor;
 
         /// <summary>
         /// Class constructor
