@@ -28,8 +28,8 @@ namespace NAO_Kinect
         /// </summary>
         private Motion naoMotion;
         private KinectVoice kinectVoice;
-        private KinectBody kinectSkeleton;
-        private BodyAngles skeletonAngles;
+        private KinectBody kinectBody;
+        private BodyAngles bodyAngles;
 
         /// <summary>
         /// Variables for calibrating and sending angles to NAO
@@ -63,6 +63,7 @@ namespace NAO_Kinect
             try
             {
                 sensor.Open();
+                sensor.IsAvailableChanged += Sensor_IsAvailableChanged;
             }
             catch (Exception)
             {
@@ -74,11 +75,11 @@ namespace NAO_Kinect
             kinectVoice.SpeechEvent += kinectVoice_NewSpeech;
 
             // Send the sensor to the skeleton class and setup the event handler
-            kinectSkeleton = new KinectBody(sensor);
-            kinectSkeleton.NewFrame += kinectSkeleton_NewFrame;
+            kinectBody = new KinectBody(sensor);
+            kinectBody.NewFrame += kinectBody_NewFrame;
 
             // starts the skeletonAngles class and sends to kinectSkeleton reference to it
-            skeletonAngles = new BodyAngles(kinectSkeleton);
+            bodyAngles = new BodyAngles(kinectBody);
 
             // enables voice reconginition
             kinectVoice.startVoiceRecognition();
@@ -102,16 +103,16 @@ namespace NAO_Kinect
         /// </summary>
         /// <param name="sender"> object that generated the event </param>
         /// <param name="e"> any additional arguments </param>
-        private void kinectSkeleton_NewFrame(object sender, EventArgs e)
+        private void kinectBody_NewFrame(object sender, EventArgs e)
         {
             // flag for updating angles
             var update = false;
 
             // gets the image from kinectSkeleton class and updates the image in the program
-            Image.Source = kinectSkeleton.getImage();
+            Image.Source = kinectBody.getImage();
 
             // gets calculated angles
-            var angles = skeletonAngles.getAngles();
+            var angles = bodyAngles.getAngles();
 
             // updates angles with calibration
             var finalAngles = new float[6];
@@ -290,6 +291,16 @@ namespace NAO_Kinect
 
             stopButton.IsEnabled = false;
             startButton.IsEnabled = true;
+        }
+
+        /// <summary>
+        /// Handles the event which the sensor becomes unavailable (E.g. paused, closed, unplugged).
+        /// </summary>
+        /// <param name="sender">object sending the event</param>
+        /// <param name="e">event arguments</param>
+        private void Sensor_IsAvailableChanged(object sender, IsAvailableChangedEventArgs e)
+        {
+            stopButton.RaiseEvent(new RoutedEventArgs(ButtonBase.ClickEvent));
         }
     }
 }

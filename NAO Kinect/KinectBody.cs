@@ -6,7 +6,6 @@
 // System imports
 using System;
 using System.Collections.Generic;
-using System.ComponentModel;
 using System.Windows;
 using System.Windows.Media;
 
@@ -29,13 +28,13 @@ namespace NAO_Kinect
         private int displayWidth;
         private int displayHeight;
 
-        private BodyFrameReader bodyFrameReader = null;
-        private CoordinateMapper coordinateMapper = null;
+        private BodyFrameReader bodyFrameReader;
+        private CoordinateMapper coordinateMapper;
 
         /// <summary>
         /// Arrays
         /// </summary>
-        private Body[] bodies = null;
+        private Body[] bodies;
         
         /// <summary>
         /// Drawing variables
@@ -121,14 +120,15 @@ namespace NAO_Kinect
                 };
 
             // populate body colors, one for each BodyIndex
-            bodyColors = new List<Pen>();
-
-            bodyColors.Add(new Pen(Brushes.Red, 6));
-            bodyColors.Add(new Pen(Brushes.Orange, 6));
-            bodyColors.Add(new Pen(Brushes.Green, 6));
-            bodyColors.Add(new Pen(Brushes.Blue, 6));
-            bodyColors.Add(new Pen(Brushes.Indigo, 6));
-            bodyColors.Add(new Pen(Brushes.Violet, 6));
+            bodyColors = new List<Pen>
+            {
+                new Pen(Brushes.Red, 6),
+                new Pen(Brushes.Orange, 6),
+                new Pen(Brushes.Green, 6),
+                new Pen(Brushes.Blue, 6),
+                new Pen(Brushes.Indigo, 6),
+                new Pen(Brushes.Violet, 6)
+            };
 
             // Create the drawing group we'll use for drawing
             drawingGroup = new DrawingGroup();
@@ -136,16 +136,20 @@ namespace NAO_Kinect
             // Create an image source that we can use in our image control
             imageSource = new DrawingImage(drawingGroup);
 
+            // start the body reader
+            startBodyReader();
 
-            // start the skeleton stream
-            startBodyStream();
+            if (bodyFrameReader != null)
+            {
+                bodyFrameReader.FrameArrived += Reader_FrameArrived;
+            }
         }
 
         /// <summary>
         /// Starts the Skeleton Stream
         /// If audio was started, restart it after starting skeleton stream
         /// </summary>
-        public void startBodyStream()
+        private void startBodyReader()
         {
             try
             {
@@ -154,7 +158,7 @@ namespace NAO_Kinect
             }
             catch (Exception)
             {
-                MessageBox.Show("Error starting body stream.");
+                MessageBox.Show("Error starting body reader.");
             }
         }
 
@@ -170,246 +174,217 @@ namespace NAO_Kinect
         }
 
         /// <summary>
-        /// Open Skeleton Frame for use
-        /// Creates points for all relevant joints and old joint positions
+        /// Handles the body frame data arriving from the sensor
         /// 
-        /// Modified based on code provided by Microsoft
-        /// 
+        /// This code was provided by Microsoft
         /// </summary>
         /// <param name="sender">object sending the event</param>
         /// <param name="e">event arguments</param>
-        private void kinect_SkeletonFrameReady(object sender, SkeletonFrameReadyEventArgs e)
+        private void Reader_FrameArrived(object sender, BodyFrameArrivedEventArgs e)
         {
-            // Open the Skeleton frame
-            using (SkeletonFrame skeletonFrame = e.OpenSkeletonFrame()) 
+            bool dataReceived = false;
+
+            using (BodyFrame bodyFrame = e.FrameReference.AcquireFrame())
             {
-                // check that a frame is available
-                if (skeletonFrame != null && skeletonData != null) 
+                if (bodyFrame != null)
                 {
-                    // get the skeletal information in this frame
-                    skeletonFrame.CopySkeletonDataTo(skeletonData); 
+                    if (bodies == null)
+                    {
+                        bodies = new Body[bodyFrame.BodyCount];
+                    }
+
+                    // The first time GetAndRefreshBodyData is called, Kinect will allocate each Body in the array.
+                    // As long as those body objects are not disposed and not set to null in the array,
+                    // those body objects will be re-used.
+                    bodyFrame.GetAndRefreshBodyData(bodies);
+                    dataReceived = true;
                 }
             }
 
-            // Start with a far enough distance
-            closestDistance = 10000f; 
-
-            // draws the skeleton on the screen
-            using (var dc = drawingGroup.Open())
+            if (dataReceived)
             {
-                // Draw a transparent background to set the render size
-                dc.DrawRectangle(Brushes.Black, null, new Rect(0.0, 0.0, RenderWidth, RenderHeight));
-
-                if (skeletonData.Length != 0)
+                using (DrawingContext dc = drawingGroup.Open())
                 {
-                    foreach (var skeleton in skeletonData.Where(s => s.TrackingState != SkeletonTrackingState.NotTracked))
+                    // Draw a transparent background to set the render size
+                    dc.DrawRectangle(Brushes.Black, null, new Rect(0.0, 0.0, displayWidth, displayHeight));
+
+                    int penIndex = 0;
+                    foreach (Body body in bodies)
                     {
-                        if (skeleton.Position.Z < closestDistance)
+                        Pen drawPen = bodyColors[penIndex++];
+
+                        if (body.IsTracked)
                         {
-                            closestID = skeleton.TrackingId;
-                            closestDistance = skeleton.Position.Z;
+                            DrawClippedEdges(body, dc);
+
+                            IReadOnlyDictionary<JointType, Joint> joints = body.Joints;
+
+                            // convert the joint points to depth (display) space
+                            var jointPoints = new Dictionary<JointType, Point>();
+
+                            foreach (JointType jointType in joints.Keys)
+                            {
+                                // sometimes the depth(Z) of an inferred joint may show as negative
+                                // clamp down to 0.1f to prevent coordinatemapper from returning (-Infinity, -Infinity)
+                                CameraSpacePoint position = joints[jointType].Position;
+                                if (position.Z < 0)
+                                {
+                                    position.Z = InferredZPositionClamp;
+                                }
+
+                                DepthSpacePoint depthSpacePoint = coordinateMapper.MapCameraPointToDepthSpace(position);
+                                jointPoints[jointType] = new Point(depthSpacePoint.X, depthSpacePoint.Y);
+                            }
+
+                            DrawBody(joints, jointPoints, dc, drawPen);
+
+                            DrawHand(body.HandLeftState, jointPoints[JointType.HandLeft], dc);
+                            DrawHand(body.HandRightState, jointPoints[JointType.HandRight], dc);
                         }
                     }
 
-                    if (closestID > 0)
-                    {
-                        sensor.SkeletonStream.ChooseSkeletons(closestID); // Track this skeleton
-                    }
-
-                    foreach (var skeleton in skeletonData)
-                    {
-                        RenderClippedEdges(skeleton, dc);
-
-                        if (skeleton.TrackingState == SkeletonTrackingState.Tracked)
-                        {
-                            DrawBonesAndJoints(skeleton, dc);
-                            trackedSkeleton = skeleton;
-                        }
-                        else if (skeleton.TrackingState == SkeletonTrackingState.PositionOnly)
-                        {
-                            dc.DrawEllipse(
-                            centerPointBrush,
-                            null,
-                            SkeletonPointToScreen(skeleton.Position),
-                            BodyCenterThickness,
-                            BodyCenterThickness);
-                        }
-                    }
-                }
-                else
-                {
-                    trackedSkeleton = null;
+                    // prevent drawing outside of our render area
+                    drawingGroup.ClipGeometry = new RectangleGeometry(new Rect(0.0, 0.0, displayWidth, displayHeight));
                 }
             }
-
-            // prevent drawing outside of our render area
-            drawingGroup.ClipGeometry = new RectangleGeometry(new Rect(0.0, 0.0, RenderWidth, RenderHeight));
 
             // calls our event
             OnNewFrame();
         }
 
         /// <summary>
-        /// Draws indicators to show which edges are clipping skeleton data
-        /// 
-        /// This code provided by Microsoft
-        /// 
+        /// Draws a body
         /// </summary>
-        /// <param name="skeleton">skeleton to draw clipping information for</param>
+        /// <param name="joints">joints to draw</param>
+        /// <param name="jointPoints">translated positions of joints to draw</param>
         /// <param name="drawingContext">drawing context to draw to</param>
-        private static void RenderClippedEdges(Skeleton skeleton, DrawingContext drawingContext)
+        /// <param name="drawingPen">specifies color to draw a specific body</param>
+        private void DrawBody(IReadOnlyDictionary<JointType, Joint> joints, IDictionary<JointType, Point> jointPoints, DrawingContext drawingContext, Pen drawingPen)
         {
-            try
+            // Draw the bones
+            foreach (var bone in bones)
             {
-                if (skeleton.ClippedEdges.HasFlag(FrameEdges.Bottom))
-                {
-                    drawingContext.DrawRectangle(
-                        Brushes.Red,
-                        null,
-                        new Rect(0, RenderHeight - ClipBoundsThickness, RenderWidth, ClipBoundsThickness));
-                }
-
-                if (skeleton.ClippedEdges.HasFlag(FrameEdges.Top))
-                {
-                    drawingContext.DrawRectangle(
-                        Brushes.Red,
-                        null,
-                        new Rect(0, 0, RenderWidth, ClipBoundsThickness));
-                }
-
-                if (skeleton.ClippedEdges.HasFlag(FrameEdges.Left))
-                {
-                    drawingContext.DrawRectangle(
-                        Brushes.Red,
-                        null,
-                        new Rect(0, 0, ClipBoundsThickness, RenderHeight));
-                }
-
-                if (skeleton.ClippedEdges.HasFlag(FrameEdges.Right))
-                {
-                    drawingContext.DrawRectangle(
-                        Brushes.Red,
-                        null,
-                        new Rect(RenderWidth - ClipBoundsThickness, 0, ClipBoundsThickness, RenderHeight));
-                }
+                DrawBone(joints, jointPoints, bone.Item1, bone.Item2, drawingContext, drawingPen);
             }
-            catch (Exception)
-            { }
-        }
 
-        /// <summary>
-        /// Draws a skeleton's bones and joints
-        /// 
-        /// This code provided by Microsoft
-        ///
-        /// </summary>
-        /// <param name="skeleton">skeleton to draw</param>
-        /// <param name="drawingContext">drawing context to draw to</param>
-        private void DrawBonesAndJoints(Skeleton skeleton, DrawingContext drawingContext)
-        {
-            // Render Torso
-            DrawBone(skeleton, drawingContext, JointType.Head, JointType.ShoulderCenter);
-            DrawBone(skeleton, drawingContext, JointType.ShoulderCenter, JointType.ShoulderLeft);
-            DrawBone(skeleton, drawingContext, JointType.ShoulderCenter, JointType.ShoulderRight);
-            DrawBone(skeleton, drawingContext, JointType.ShoulderCenter, JointType.Spine);
-            DrawBone(skeleton, drawingContext, JointType.Spine, JointType.HipCenter);
-            DrawBone(skeleton, drawingContext, JointType.HipCenter, JointType.HipLeft);
-            DrawBone(skeleton, drawingContext, JointType.HipCenter, JointType.HipRight);
-
-            // Left Arm
-            DrawBone(skeleton, drawingContext, JointType.ShoulderLeft, JointType.ElbowLeft);
-            DrawBone(skeleton, drawingContext, JointType.ElbowLeft, JointType.WristLeft);
-            DrawBone(skeleton, drawingContext, JointType.WristLeft, JointType.HandLeft);
-
-            // Right Arm
-            DrawBone(skeleton, drawingContext, JointType.ShoulderRight, JointType.ElbowRight);
-            DrawBone(skeleton, drawingContext, JointType.ElbowRight, JointType.WristRight);
-            DrawBone(skeleton, drawingContext, JointType.WristRight, JointType.HandRight);
-
-            // Left Leg
-            DrawBone(skeleton, drawingContext, JointType.HipLeft, JointType.KneeLeft);
-            DrawBone(skeleton, drawingContext, JointType.KneeLeft, JointType.AnkleLeft);
-            DrawBone(skeleton, drawingContext, JointType.AnkleLeft, JointType.FootLeft);
-
-            // Right Leg
-            DrawBone(skeleton, drawingContext, JointType.HipRight, JointType.KneeRight);
-            DrawBone(skeleton, drawingContext, JointType.KneeRight, JointType.AnkleRight);
-            DrawBone(skeleton, drawingContext, JointType.AnkleRight, JointType.FootRight);
-
-            // Render Joints
-            foreach (Joint joint in skeleton.Joints)
+            // Draw the joints
+            foreach (JointType jointType in joints.Keys)
             {
                 Brush drawBrush = null;
 
-                if (joint.TrackingState == JointTrackingState.Tracked)
+                TrackingState trackingState = joints[jointType].TrackingState;
+
+                if (trackingState == TrackingState.Tracked)
                 {
                     drawBrush = trackedJointBrush;
                 }
-                else if (joint.TrackingState == JointTrackingState.Inferred)
+                else if (trackingState == TrackingState.Inferred)
                 {
                     drawBrush = inferredJointBrush;
                 }
 
                 if (drawBrush != null)
                 {
-                    drawingContext.DrawEllipse(drawBrush, null, SkeletonPointToScreen(joint.Position), JointThickness, JointThickness);
+                    drawingContext.DrawEllipse(drawBrush, null, jointPoints[jointType], JointThickness, JointThickness);
                 }
             }
         }
 
         /// <summary>
-        /// Maps a SkeletonPoint to lie within our render space and converts to Point
-        /// 
-        /// This code provided by Microsoft
-        ///
+        /// Draws one bone of a body (joint to joint)
         /// </summary>
-        /// <param name="skelpoint">point to map</param>
-        /// <returns>mapped point</returns>
-        private Point SkeletonPointToScreen(SkeletonPoint skelpoint)
-        {
-            // Convert point to depth space.  
-            // We are not using depth directly, but we do want the points in our 640x480 output resolution.
-            DepthImagePoint depthPoint = sensor.CoordinateMapper.MapSkeletonPointToDepthPoint(skelpoint, DepthImageFormat.Resolution640x480Fps30);
-            return new Point(depthPoint.X, depthPoint.Y);
-        }
-
-        /// <summary>
-        /// Draws a bone line between two joints
-        /// 
-        /// This code provided by Microsoft
-        ///
-        /// </summary>
-        /// <param name="skeleton">skeleton to draw bones from</param>
+        /// <param name="joints">joints to draw</param>
+        /// <param name="jointPoints">translated positions of joints to draw</param>
+        /// <param name="jointType0">first joint of bone to draw</param>
+        /// <param name="jointType1">second joint of bone to draw</param>
         /// <param name="drawingContext">drawing context to draw to</param>
-        /// <param name="jointType0">joint to start drawing from</param>
-        /// <param name="jointType1">joint to end drawing at</param>
-        private void DrawBone(Skeleton skeleton, DrawingContext drawingContext, JointType jointType0, JointType jointType1)
+        /// /// <param name="drawingPen">specifies color to draw a specific bone</param>
+        private void DrawBone(IReadOnlyDictionary<JointType, Joint> joints, IDictionary<JointType, Point> jointPoints, JointType jointType0, JointType jointType1, DrawingContext drawingContext, Pen drawingPen)
         {
-            Joint joint0 = skeleton.Joints[jointType0];
-            Joint joint1 = skeleton.Joints[jointType1];
+            Joint joint0 = joints[jointType0];
+            Joint joint1 = joints[jointType1];
 
             // If we can't find either of these joints, exit
-            if (joint0.TrackingState == JointTrackingState.NotTracked ||
-                joint1.TrackingState == JointTrackingState.NotTracked)
-            {
-                return;
-            }
-
-            // Don't draw if both points are inferred
-            if (joint0.TrackingState == JointTrackingState.Inferred &&
-                joint1.TrackingState == JointTrackingState.Inferred)
+            if (joint0.TrackingState == TrackingState.NotTracked ||
+                joint1.TrackingState == TrackingState.NotTracked)
             {
                 return;
             }
 
             // We assume all drawn bones are inferred unless BOTH joints are tracked
-            var drawPen = inferredBonePen;
-            if (joint0.TrackingState == JointTrackingState.Tracked && joint1.TrackingState == JointTrackingState.Tracked)
+            Pen drawPen = inferredBonePen;
+            if ((joint0.TrackingState == TrackingState.Tracked) && (joint1.TrackingState == TrackingState.Tracked))
             {
-                drawPen = trackedBonePen;
+                drawPen = drawingPen;
             }
 
-            drawingContext.DrawLine(drawPen, SkeletonPointToScreen(joint0.Position), SkeletonPointToScreen(joint1.Position));
+            drawingContext.DrawLine(drawPen, jointPoints[jointType0], jointPoints[jointType1]);
+        }
+
+        /// <summary>
+        /// Draws a hand symbol if the hand is tracked: red circle = closed, green circle = opened; blue circle = lasso
+        /// </summary>
+        /// <param name="handState">state of the hand</param>
+        /// <param name="handPosition">position of the hand</param>
+        /// <param name="drawingContext">drawing context to draw to</param>
+        private void DrawHand(HandState handState, Point handPosition, DrawingContext drawingContext)
+        {
+            switch (handState)
+            {
+                case HandState.Closed:
+                    drawingContext.DrawEllipse(handClosedBrush, null, handPosition, HandSize, HandSize);
+                    break;
+
+                case HandState.Open:
+                    drawingContext.DrawEllipse(handOpenBrush, null, handPosition, HandSize, HandSize);
+                    break;
+
+                case HandState.Lasso:
+                    drawingContext.DrawEllipse(handLassoBrush, null, handPosition, HandSize, HandSize);
+                    break;
+            }
+        }
+
+        /// <summary>
+        /// Draws indicators to show which edges are clipping body data
+        /// </summary>
+        /// <param name="body">body to draw clipping information for</param>
+        /// <param name="drawingContext">drawing context to draw to</param>
+        private void DrawClippedEdges(Body body, DrawingContext drawingContext)
+        {
+            FrameEdges clippedEdges = body.ClippedEdges;
+
+            if (clippedEdges.HasFlag(FrameEdges.Bottom))
+            {
+                drawingContext.DrawRectangle(
+                    Brushes.Red,
+                    null,
+                    new Rect(0, displayHeight - ClipBoundsThickness, displayWidth, ClipBoundsThickness));
+            }
+
+            if (clippedEdges.HasFlag(FrameEdges.Top))
+            {
+                drawingContext.DrawRectangle(
+                    Brushes.Red,
+                    null,
+                    new Rect(0, 0, displayWidth, ClipBoundsThickness));
+            }
+
+            if (clippedEdges.HasFlag(FrameEdges.Left))
+            {
+                drawingContext.DrawRectangle(
+                    Brushes.Red,
+                    null,
+                    new Rect(0, 0, ClipBoundsThickness, displayHeight));
+            }
+
+            if (clippedEdges.HasFlag(FrameEdges.Right))
+            {
+                drawingContext.DrawRectangle(
+                    Brushes.Red,
+                    null,
+                    new Rect(displayWidth - ClipBoundsThickness, 0, ClipBoundsThickness, displayHeight));
+            }
         }
 
         /// <summary>
@@ -439,7 +414,7 @@ namespace NAO_Kinect
         /// <returns> tracked skeleton </returns>
         public Body getBody()
         {
-            return trackedBody;
+            return bodies[0];
         }
     }
 }
