@@ -43,13 +43,11 @@ namespace NAO_Kinect
 
             if (trackedBody != null)
             {
-                // get X and Y coordinates of the left and right wrists
                 float wlY = trackedBody.Joints[JointType.WristLeft].Position.Y;
                 float wlX = trackedBody.Joints[JointType.WristLeft].Position.X;
                 float wrY = trackedBody.Joints[JointType.WristRight].Position.Y;
                 float wrX = trackedBody.Joints[JointType.WristRight].Position.X;
 
-                // These joints are not in Kinect 2.0
                 float scX = trackedBody.Joints[JointType.SpineShoulder].Position.X;
                 float scY = trackedBody.Joints[JointType.SpineShoulder].Position.Y;
 
@@ -59,11 +57,9 @@ namespace NAO_Kinect
                 float erX = trackedBody.Joints[JointType.ElbowRight].Position.X;
                 float erY = trackedBody.Joints[JointType.ElbowRight].Position.Y;
 
-                // These joints are not in Kinect 2.0
                 float spX = trackedBody.Joints[JointType.SpineBase].Position.X;
                 float spY = trackedBody.Joints[JointType.SpineBase].Position.Y;
 
-                // Disable angleCalc until joints are found for Kinect 2.0
                 angles[0] = angleCalc(scX, scY, spX, spY, erX, erY);
                 angles[1] = angleCalc(scX, scY, spX, spY, elX, elY);
                 angles[2] = angleCalc(elX, elY, wlX, wlY, scX, scY);
