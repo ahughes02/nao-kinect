@@ -70,18 +70,18 @@ namespace NAO_Kinect
             }
 
             // Send the sensor to the voice class and setup the event handler
-            //kinectVoice = new KinectVoice(sensor);
-            //kinectVoice.SpeechEvent += kinectVoice_NewSpeech;
+            kinectVoice = new KinectVoice(sensor);
+            kinectVoice.SpeechEvent += kinectVoice_NewSpeech;
 
             // Send the sensor to the skeleton class and setup the event handler
             kinectBody = new KinectBody(sensor);
             kinectBody.NewFrame += kinectBody_NewFrame;
 
-            // starts the skeletonAngles class and sends to kinectSkeleton reference to it
+            // Starts the skeletonAngles class and sends to kinectSkeleton reference to it
             bodyAngles = new BodyAngles(kinectBody);
 
-            // enables voice reconginition
-            //kinectVoice.startVoiceRecognition();
+            // Enables voice reconginition
+            kinectVoice.startVoiceRecognition();
         }
 
         /// <summary>

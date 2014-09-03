@@ -64,7 +64,7 @@ namespace NAO_Kinect
         /// </returns>
         private static RecognizerInfo GetKinectRecognizer()
         {
-            foreach (var recognizer in SpeechRecognitionEngine.InstalledRecognizers())
+            foreach (RecognizerInfo recognizer in SpeechRecognitionEngine.InstalledRecognizers())
             {
                 string value;
                 recognizer.AdditionalInfo.TryGetValue("Kinect", out value);
@@ -82,29 +82,29 @@ namespace NAO_Kinect
         /// </summary>
         public void startVoiceRecognition()
         {
-            // start voice recongintion
+            // Start voice recongintion
             try
             {
-                var ri = GetKinectRecognizer();  //Initializes Kinect Recognizer for speech
-                sre = new SpeechRecognitionEngine(ri.Id);   //Initializes Speech Recognition Engine
+                var ri = GetKinectRecognizer();  // Initializes Kinect Recognizer for speech
+                sre = new SpeechRecognitionEngine(ri.Id);   // Initializes Speech Recognition Engine
 
-                //Create simple string array that contains speech recognition data and interpreted values
-                string[] valuesHeard = { "kinect start", "kinect stop", "kinect calibrate" };
+                // Create simple string array that contains speech recognition data and interpreted values
+                string[] valuesHeard = { "computer start", "computer stop", "computer calibrate" };
                 string[] valuesInterpreted = { "on", "off", "calibrate" };
 
-                var commands = new Choices();       //Initializes Choices for engine
+                var commands = new Choices();       // Initializes Choices for engine
 
-                //Adds all values in string arrays to commands for engine
+                // Adds all values in string arrays to commands for engine
                 for (var i = 0; i < valuesHeard.Length; i++)
                 {
                     commands.Add(new SemanticResultValue(valuesHeard[i], valuesInterpreted[i]));
                 }
 
-                //Submits commands to Grammar Builder for engine
+                // Submits commands to Grammar Builder for engine
                 var g = new Grammar(commands.ToGrammarBuilder());
                 sre.LoadGrammar(g);
 
-                //Constantly try to recognize speech
+                // Constantly try to recognize speech
                 sre.SpeechRecognized += SpeechRecognized;
 
                 IReadOnlyList<AudioBeam> audioBeamList = sensor.AudioSource.AudioBeams;
@@ -114,9 +114,9 @@ namespace NAO_Kinect
                 sre.SetInputToAudioStream(audioStream, new SpeechAudioFormatInfo(EncodingFormat.Pcm, 16000, 16, 1, 32000, 2, null));
                 sre.RecognizeAsync(RecognizeMode.Multiple);
             }
-            catch (Exception) // Catch to make sure if no Kinect is found program does not crash
+            catch (Exception e) // Catch to make sure if no Kinect is found program does not crash
             {
-                MessageBox.Show("No Kinect Found. Connect Kinect and then restart program.");
+                MessageBox.Show("Error starting audio stream: " + e.Message);
             }
         }
 
@@ -136,7 +136,7 @@ namespace NAO_Kinect
         }
 
         /// <summary>
-        /// triggers speech recognized
+        /// Triggers speech recognized
         /// </summary>
         private void OnSpeechEvent()
         {
@@ -148,7 +148,7 @@ namespace NAO_Kinect
         }
 
         /// <summary>
-        /// Teturns the most recent recognized word
+        /// Returns the most recent recognized word
         /// </summary>
         /// <returns> result </returns>
         public string getResult()
@@ -166,7 +166,7 @@ namespace NAO_Kinect
         }
 
         /// <summary>
-        /// rTeturns the most recent confidence
+        /// Returns the most recent confidence
         /// </summary>
         /// <returns> confidence </returns>
         public float getConfidence()
