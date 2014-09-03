@@ -59,7 +59,6 @@ namespace NAO_Kinect
         {
             // Get the Kinect Sensor
             sensor = KinectSensor.GetDefault();
-
             try
             {
                 sensor.Open();
@@ -71,8 +70,8 @@ namespace NAO_Kinect
             }
 
             // Send the sensor to the voice class and setup the event handler
-            kinectVoice = new KinectVoice(sensor);
-            kinectVoice.SpeechEvent += kinectVoice_NewSpeech;
+            //kinectVoice = new KinectVoice(sensor);
+            //kinectVoice.SpeechEvent += kinectVoice_NewSpeech;
 
             // Send the sensor to the skeleton class and setup the event handler
             kinectBody = new KinectBody(sensor);
@@ -82,7 +81,7 @@ namespace NAO_Kinect
             bodyAngles = new BodyAngles(kinectBody);
 
             // enables voice reconginition
-            kinectVoice.startVoiceRecognition();
+            //kinectVoice.startVoiceRecognition();
         }
 
         /// <summary>
@@ -135,10 +134,10 @@ namespace NAO_Kinect
             }
 
             // debug output, displays x and y coordinates
-            debug1.Text = "Angle 1: " + angles[0];
-            debug1.Text += "Angle 2: " + angles[1];
-            debug1.Text += "Angle 3: " + angles[2];
-            debug1.Text += "Angle 4: " + angles[3];
+            debug1.Text = "Angle 1: " + angles[0] + "\n";
+            debug1.Text += "Angle 2: " + angles[1] + "\n";
+            debug1.Text += "Angle 3: " + angles[2] + "\n";
+            debug1.Text += "Angle 4: " + angles[3] + "\n";
 
             // check that angles have changed enough to move motors
             for (var x = 0; x < 2; x++)
@@ -301,6 +300,11 @@ namespace NAO_Kinect
         private void Sensor_IsAvailableChanged(object sender, IsAvailableChangedEventArgs e)
         {
             stopButton.RaiseEvent(new RoutedEventArgs(ButtonBase.ClickEvent));
+        }
+
+        private void calibrateButton_Click(object sender, RoutedEventArgs e)
+        {
+            calibrated = false;
         }
     }
 }

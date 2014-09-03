@@ -414,7 +414,14 @@ namespace NAO_Kinect
         /// <returns> tracked skeleton </returns>
         public Body getBody()
         {
-            return bodies[0];
+            foreach (Body body in bodies)
+            {
+                if (body.IsTracked)
+                {
+                    return body;
+                }
+            }
+            return null;
         }
     }
 }
