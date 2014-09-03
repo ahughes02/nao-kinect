@@ -1,15 +1,12 @@
 ﻿/*
  * This software was developed by Austin Hughes
- * Last Modified: 2014-08-24
+ * Last Modified: 2014-09-03
  */
 
 // System Imports
 using System;
 using System.Windows;
 using System.Windows.Controls.Primitives;
-
-// Microsoft SDK Imports
-using Microsoft.Kinect;
 
 namespace NAO_Kinect
 {
@@ -19,18 +16,12 @@ namespace NAO_Kinect
     public partial class MainWindow
     {
         /// <summary>
-        /// Active Kinect sensor
-        /// </summary>
-        private KinectSensor sensor;
-
-        /// <summary>
         /// Class declarations
         /// </summary>
         private Motion naoMotion;
-        private KinectVoice kinectVoice;
-        private KinectBody kinectBody;
         private BodyAngles bodyAngles;
-
+        private KinectInterface kinectInterface;
+        
         /// <summary>
         /// Variables for calibrating and sending angles to NAO
         /// </summary>
@@ -50,6 +41,12 @@ namespace NAO_Kinect
             naoMotion = new Motion();
         }
 
+        /// ********************************************************
+        /// 
+        ///                     UI EVENTS
+        /// 
+        /// ********************************************************
+
         /// <summary>
         /// Event handler for the main UI being loaded
         /// </summary>
@@ -57,31 +54,12 @@ namespace NAO_Kinect
         /// <param name="e"> any additional arguments </param>
         private void MainWindow_Loaded(object sender, RoutedEventArgs e)
         {
-            // Get the Kinect Sensor
-            sensor = KinectSensor.GetDefault();
-            try
-            {
-                sensor.Open();
-                sensor.IsAvailableChanged += Sensor_IsAvailableChanged;
-            }
-            catch (Exception)
-            {
-                sensor = null;
-            }
-
-            // Send the sensor to the voice class and setup the event handler
-            kinectVoice = new KinectVoice(sensor);
-            kinectVoice.SpeechEvent += kinectVoice_NewSpeech;
-
-            // Send the sensor to the skeleton class and setup the event handler
-            kinectBody = new KinectBody(sensor);
-            kinectBody.NewFrame += kinectBody_NewFrame;
+            kinectInterface = new KinectInterface();
+            kinectInterface.NewFrame += kinectInterface_NewFrame;
+            kinectInterface.NewSpeech += kinectInterface_NewSpeech;
 
             // Starts the skeletonAngles class and sends to kinectSkeleton reference to it
-            bodyAngles = new BodyAngles(kinectBody);
-
-            // Enables voice reconginition
-            kinectVoice.startVoiceRecognition();
+            bodyAngles = new BodyAngles(kinectInterface);
         }
 
         /// <summary>
@@ -91,24 +69,63 @@ namespace NAO_Kinect
         /// <param name="e"> any additional arguments </param>
         private void MainWindow_Unloaded(object sender, RoutedEventArgs e)
         {
-            if (sensor != null)
+            if (kinectInterface != null)
             {
-                sensor.Close();
+                kinectInterface.end();
             }
         }
 
         /// <summary>
-        /// Event handler for new frames created by the kinectSkeleton class
+        /// event handler for start button click, enables NAO connection
+        /// </summary>
+        /// <param name="sender"> object that sent the event </param>
+        /// <param name="e"> any additional arguments </param>
+        private void startButton_Click(object sender, RoutedEventArgs e)
+        {
+            naoMotion.connect(ipBox.Text);
+
+            changeAngles = true;
+
+            stopButton.IsEnabled = true;
+            startButton.IsEnabled = false;
+        }
+
+        /// <summary>
+        /// event handler for stop button click, disables NAO connection
+        /// </summary>
+        /// <param name="sender"> object that sent the event </param>
+        /// <param name="e"> any additional arguments </param>
+        private void stopButton_Click(object sender, RoutedEventArgs e)
+        {
+            changeAngles = false;
+
+            stopButton.IsEnabled = false;
+            startButton.IsEnabled = true;
+        }
+
+        private void calibrateButton_Click(object sender, RoutedEventArgs e)
+        {
+            calibrated = false;
+        }
+
+        /// ********************************************************
+        /// 
+        ///                     KINECT EVENTS
+        /// 
+        /// ********************************************************
+
+        /// <summary>
+        /// Event handler for new frames created by the kinectBody class
         /// </summary>
         /// <param name="sender"> object that generated the event </param>
         /// <param name="e"> any additional arguments </param>
-        private void kinectBody_NewFrame(object sender, EventArgs e)
+        private void kinectInterface_NewFrame(object sender, EventArgs e)
         {
             // flag for updating angles
             var update = false;
 
             // gets the image from kinectSkeleton class and updates the image in the program
-            Image.Source = kinectBody.getImage();
+            Image.Source = kinectInterface.getImage();
 
             // gets calculated angles
             var angles = bodyAngles.getAngles();
@@ -159,6 +176,50 @@ namespace NAO_Kinect
                 updateNAO(angles[3], "LElbowRoll");
             }
         }
+
+        /// <summary>
+        /// Event handler for new frames created by the kinectBody class
+        /// </summary>
+        /// <param name="sender"> object that generated the event </param>
+        /// <param name="e"> any additional arguments </param>
+        private void kinectInterface_NewSpeech(object sender, EventArgs e)
+        {
+            var result = kinectInterface.getResult();
+            var semanticResult = kinectInterface.getSemanticResult();
+            var confidence = kinectInterface.getConfidence();
+
+            if (confidence > 0.6) //If confidence of recognized speech is greater than 60%
+            {
+                // Debug output, tells what phrase was recongnized and the confidence
+                debug2.Text = "Recognized: " + result + " \nConfidence: " + confidence;
+
+                // if statements to preform actions based on results
+                if (semanticResult == "on" && startButton.IsEnabled)
+                {
+                    startButton.RaiseEvent(new RoutedEventArgs(ButtonBase.ClickEvent));
+                }
+
+                if (semanticResult == "off" && stopButton.IsEnabled)
+                {
+                    stopButton.RaiseEvent(new RoutedEventArgs(ButtonBase.ClickEvent));
+                }
+
+                if (semanticResult == "calibrate")
+                {
+                    calibrated = false;
+                }
+            }
+            else // Else say that it was rejected and confidence
+            {
+                debug2.Text = "Rejected " + " \nConfidence: " + confidence;
+            }
+        }
+
+        /// ********************************************************
+        /// 
+        ///                    NAO METHODS
+        /// 
+        /// ********************************************************
 
         private void updateNAO(float angle, string joint)
         {
@@ -223,88 +284,6 @@ namespace NAO_Kinect
                     { }
                 }
             }
-        }
-
-        /// <summary>
-        /// Event handler for speech events
-        /// </summary>
-        /// <param name="sender"> object that sent the event </param>
-        /// <param name="e"> any additional arguments </param>
-        private void kinectVoice_NewSpeech(object sender, EventArgs e)
-        {
-            // variables for heard speech, final speech result, and confidence
-            var result = kinectVoice.getResult();
-            var semanticResult = kinectVoice.getSemanticResult();
-            var confidence = kinectVoice.getConfidence();
-
-            if (confidence > 0.6) //If confidence of recognized speech is greater than 60%
-            {
-                // Debug output, tells what phrase was recongnized and the confidence
-                debug2.Text = "Recognized: " + result + " \nConfidence: " + confidence;
-
-                // if statements to preform actions based on results
-                if (semanticResult == "on" && startButton.IsEnabled)
-                {
-                    startButton.RaiseEvent(new RoutedEventArgs(ButtonBase.ClickEvent));
-                }
-
-                if (semanticResult == "off" && stopButton.IsEnabled)
-                {
-                    stopButton.RaiseEvent(new RoutedEventArgs(ButtonBase.ClickEvent));
-                }
-
-                if (semanticResult == "calibrate")
-                {
-                    calibrated = false;
-                }
-            }
-            else // Else say that it was rejected and confidence
-            {
-                debug2.Text = "Rejected " + " \nConfidence: " + confidence;
-            }
-        }
-
-        /// <summary>
-        /// event handler for start button click, enables NAO connection
-        /// </summary>
-        /// <param name="sender"> object that sent the event </param>
-        /// <param name="e"> any additional arguments </param>
-        private void startButton_Click(object sender, RoutedEventArgs e)
-        {
-            naoMotion.connect(ipBox.Text);
-
-            changeAngles = true;
-
-            stopButton.IsEnabled = true;
-            startButton.IsEnabled = false;
-        }
-
-        /// <summary>
-        /// event handler for stop button click, disables NAO connection
-        /// </summary>
-        /// <param name="sender"> object that sent the event </param>
-        /// <param name="e"> any additional arguments </param>
-        private void stopButton_Click(object sender, RoutedEventArgs e)
-        {
-            changeAngles = false;
-
-            stopButton.IsEnabled = false;
-            startButton.IsEnabled = true;
-        }
-
-        /// <summary>
-        /// Handles the event which the sensor becomes unavailable (E.g. paused, closed, unplugged).
-        /// </summary>
-        /// <param name="sender">object sending the event</param>
-        /// <param name="e">event arguments</param>
-        private void Sensor_IsAvailableChanged(object sender, IsAvailableChangedEventArgs e)
-        {
-            stopButton.RaiseEvent(new RoutedEventArgs(ButtonBase.ClickEvent));
-        }
-
-        private void calibrateButton_Click(object sender, RoutedEventArgs e)
-        {
-            calibrated = false;
         }
     }
 }

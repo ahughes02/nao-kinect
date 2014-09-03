@@ -1,6 +1,6 @@
 ﻿/*
  * This software was developed by Austin Hughes
- * Last Modified: 2013-08-24
+ * Last Modified: 2013-09-03
  */
 
 // System imports
@@ -19,16 +19,16 @@ namespace NAO_Kinect
         /// <summary>
         /// Holds the skeleton class and the body we want angles for
         /// </summary>
-        private KinectBody kinectBody;
+        private KinectInterface kinectInterface;
         private Body trackedBody;
 
         /// <summary>
         /// Class constructor
         /// </summary>
-        /// <param name="bodyClass"> reference to current skeleton class </param>
-        public BodyAngles(KinectBody bodyClass)
+        /// <param name="interfaceClass"> reference to current kinect interface </param>
+        public BodyAngles(KinectInterface interfaceClass)
         {
-            kinectBody = bodyClass;
+            kinectInterface = interfaceClass;
         }
 
         /// <summary>
@@ -37,7 +37,7 @@ namespace NAO_Kinect
         /// <returns> array of useful angles </returns>
         public float[] getAngles()
         {
-            trackedBody = kinectBody.getBody();
+            trackedBody = kinectInterface.getBody();
 
             var angles = new float[6];
 

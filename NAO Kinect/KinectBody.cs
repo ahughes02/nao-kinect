@@ -1,6 +1,6 @@
 ﻿/*
  * This software was developed by Austin Hughes
- * Last Modified: 2014-08-24
+ * Last Modified: 2014-09-03
  */
 
 // System imports

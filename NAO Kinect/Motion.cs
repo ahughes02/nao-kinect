@@ -1,12 +1,11 @@
 ﻿/*
  * This software was developed by Austin Hughes
- * Last Modified: 2014-08-24
+ * Last Modified: 2014-09-03
  */
 
 // System imports
 using System;
 using System.IO;
-using System.Windows;
 
 // Addebaran import
 using Aldebaran.Proxies;
@@ -43,7 +42,6 @@ namespace NAO_Kinect
             }
             catch (Exception e)
             {
-                MessageBox.Show("Exception occurred, error log in C:\\NAO Motion\\exception.txt");
                 File.WriteAllText(@"C:\\NAO Motion\\exception.txt", e.ToString()); // write exepctions to text file
             }
         }
@@ -68,7 +66,6 @@ namespace NAO_Kinect
             catch (Exception e)
             {
                 // display error message and write exceptions to a file
-                MessageBox.Show("Exception occurred, error log in C:\\NAO Motion\\exception.txt");
                 File.WriteAllText(@"C:\\NAO Motion\\exception.txt", e.ToString());
             }
         }
@@ -77,17 +74,18 @@ namespace NAO_Kinect
         /// Opens the desired hand
         /// </summary>
         /// <param name="hand"> the desired hand, either LHand or RHand </param>
-        public void openHand(string hand)
+        public bool openHand(string hand)
         {
             try
             {
                 naoMotion.openHand(hand);
+                return true;
             }
             catch (Exception e)
             {
                 // display error message and write exceptions to a file
-                MessageBox.Show("Exception occurred, error log in C:\\NAO Motion\\exception.txt");
                 File.WriteAllText(@"C:\\NAO Motion\\exception.txt", e.ToString());
+                return false;
             }
         }
 
@@ -95,17 +93,18 @@ namespace NAO_Kinect
         /// Closes the desired hand
         /// </summary>
         /// <param name="hand"> the desired hand, either LHand or RHand </param>
-        public void closeHand(string hand)
+        public bool closeHand(string hand)
         {
             try
             {
                 naoMotion.closeHand(hand);
+                return true;
             }
             catch (Exception e)
             {
                 // display error message and write exceptions to a file
-                MessageBox.Show("Exception occurred, error log in C:\\NAO Motion\\exception.txt");
                 File.WriteAllText(@"C:\\NAO Motion\\exception.txt", e.ToString());
+                return false;
             }
         }
 
@@ -125,7 +124,6 @@ namespace NAO_Kinect
             catch (Exception e)
             {
                 // display error message and write exceptions to a file
-                MessageBox.Show("Exception occurred, error log in C:\\NAO Motion\\exception.txt");
                 File.WriteAllText(@"C:\\NAO Motion\\exception.txt", e.ToString());
             }
 
@@ -137,17 +135,18 @@ namespace NAO_Kinect
         /// </summary>
         /// <param name="value"> the angle in radians </param>
         /// <param name="joint"> the joint to be moved </param>
-        public void moveJoint(float value, string joint)
+        public bool moveJoint(float value, string joint)
         {
             try
             {
                 naoMotion.setAngles(joint, value, 0.1f);
+                return true;
             }
             catch (Exception e)
             {
                 // display error message and write exceptions to a file
-                MessageBox.Show("Exception occurred, error log in C:\\NAO Motion\\exception.txt");
                 File.WriteAllText(@"C:\\NAO Motion\\exception.txt", e.ToString());
+                return false;
             }
         }
     }
