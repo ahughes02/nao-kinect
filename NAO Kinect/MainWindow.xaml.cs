@@ -1,6 +1,6 @@
 ﻿/*
  * This software was developed by Austin Hughes
- * Last Modified: 2014-09-03
+ * Last Modified: 2014-09-04
  */
 
 // System Imports
@@ -19,7 +19,7 @@ namespace NAO_Kinect
         /// Class declarations
         /// </summary>
         private Motion naoMotion;
-        private BodyProcessing bodyAngles;
+        private BodyProcessing bodyProcessing;
         private KinectInterface kinectInterface;
         
         /// <summary>
@@ -27,6 +27,9 @@ namespace NAO_Kinect
         /// </summary>
         private bool calibrated;
         private bool changeAngles;
+        private string rHandStatus = "none";
+        private string lHandStatus = "none";
+        private readonly string[] jointNames = {"RShoulderRoll", "LShoulderRoll", "RElbowRoll", "LElbowRoll"};
         private float[] calibrationAngles = new float[6];
         private float[] oldAngles = new float[6];
 
@@ -59,7 +62,7 @@ namespace NAO_Kinect
             kinectInterface.NewSpeech += kinectInterface_NewSpeech;
 
             // Starts the skeletonAngles class and sends to kinectSkeleton reference to it
-            bodyAngles = new BodyProcessing(kinectInterface);
+            bodyProcessing = new BodyProcessing(kinectInterface);
         }
 
         /// <summary>
@@ -121,25 +124,21 @@ namespace NAO_Kinect
         /// <param name="e"> any additional arguments </param>
         private void kinectInterface_NewFrame(object sender, EventArgs e)
         {
-            // flag for updating angles
-            var update = false;
-
-            // gets the image from kinectSkeleton class and updates the image in the program
+            // gets the image from kinectIntraface class and updates the image in the UI
             Image.Source = kinectInterface.getImage();
 
-            // gets calculated angles
-            var angles = bodyAngles.getAngles();
+            // gets array of info from bodyProcessing
+            var info = bodyProcessing.getInfo();
 
-            // updates angles with calibration
-            var finalAngles = new float[6];
+            // array to store angles with calibration
+            var finalAngles = new float[4];
 
             // checks for calibration flag and then updates calibration
             if (calibrated == false)
             {
-                // only using 2 of 6 possible angles right now
                 for (var x = 0; x < 4; x++)
                 {
-                    calibrationAngles[x] = angles[x];
+                    calibrationAngles[x] = info[x];
                 }
                 calibrated = true;
             }
@@ -147,33 +146,56 @@ namespace NAO_Kinect
             // generate calibrated angles
             for (var x = 0; x < 4; x++)
             {
-                finalAngles[x] = angles[x] - calibrationAngles[x]; // adjustment to work with NAO robot angles
+                finalAngles[x] = info[x] - calibrationAngles[x]; // adjustment to work with NAO robot angles
             }
 
-            // debug output, displays x and y coordinates
-            debug1.Text = "Angle 1: " + angles[0] + "\n";
-            debug1.Text += "Angle 2: " + angles[1] + "\n";
-            debug1.Text += "Angle 3: " + angles[2] + "\n";
-            debug1.Text += "Angle 4: " + angles[3] + "\n";
+            // debug output, displays angles in radians
+            debug1.Text = "Angle 1: " + info[0] + "\n";
+            debug1.Text += "Angle 2: " + info[1] + "\n";
+            debug1.Text += "Angle 3: " + info[2] + "\n";
+            debug1.Text += "Angle 4: " + info[3] + "\n";
+            debug1.Text += "------------------------\n";
+            debug1.Text += "Calibrated Angle 1: " + finalAngles[0] + "\n";
+            debug1.Text += "Calibrated Angle 2: " + finalAngles[1] + "\n";
+            debug1.Text += "Calibrated Angle 3: " + finalAngles[2] + "\n";
+            debug1.Text += "Calibrated Angle 4: " + finalAngles[3] + "\n";
 
-            // check that angles have changed enough to move motors
-            for (var x = 0; x < 2; x++)
+            // Check to make sure that angle has changed enough to send new angle and update angle if it has
+            for (var x = 0; x < 4; x++)
             {
-                // if block to send angles to NAO and makes sure they are not out of bound
-                if (changeAngles && (Math.Abs(oldAngles[0]) - Math.Abs(finalAngles[0]) > .1 || Math.Abs(oldAngles[0]) - Math.Abs(finalAngles[0]) < .1))
+                if (changeAngles &&
+                    (Math.Abs(oldAngles[x]) - Math.Abs(finalAngles[x]) > .1 ||
+                     Math.Abs(oldAngles[x]) - Math.Abs(finalAngles[x]) < .1))
                 {
                     oldAngles[0] = finalAngles[0];
-
-                    update = true;
+                    updateNAO(finalAngles[x], jointNames[x]);
                 }
             }
 
-            if (update)
+            // Update right hand
+            // ReSharper disable once CompareOfFloatsByEqualityOperator
+            if (info[4] == 1 && rHandStatus != "open")
             {
-                updateNAO(angles[0], "RShoulderRoll");
-                updateNAO(angles[1], "LShoulderRoll");
-                updateNAO(angles[2], "RElbowRoll");
-                updateNAO(angles[3], "LElbowRoll");
+                naoMotion.openHand("RHand");
+                rHandStatus = "open";
+            }
+            else if(rHandStatus != "closed")
+            {
+                naoMotion.closeHand("RHand");
+                rHandStatus = "closed";
+            }
+
+            // Update left hand
+            // ReSharper disable once CompareOfFloatsByEqualityOperator
+            if (info[5] == 1 && lHandStatus != "open")
+            {
+                naoMotion.openHand("LHand");
+                lHandStatus = "open";
+            }
+            else if (lHandStatus != "closed")
+            {
+                naoMotion.closeHand("LHand");
+                lHandStatus = "closed";
             }
         }
 

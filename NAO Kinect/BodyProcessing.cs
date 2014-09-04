@@ -1,6 +1,6 @@
 ﻿/*
  * This software was developed by Austin Hughes
- * Last Modified: 2013-09-03
+ * Last Modified: 2013-09-04
  */
 
 // System imports
@@ -12,12 +12,12 @@ using Microsoft.Kinect;
 namespace NAO_Kinect
 {
     /// <summary>
-    /// This class takes a tracked body and generates the angles between joints
+    /// This class takes a tracked body and generates useful data from it
     /// </summary>
     class BodyProcessing
     {
         /// <summary>
-        /// Holds the skeleton class and the body we want angles for
+        /// Holds the KinectInterface class and the body we want angles for
         /// </summary>
         private KinectInterface kinectInterface;
         private Body trackedBody;
@@ -34,12 +34,12 @@ namespace NAO_Kinect
         /// <summary>
         /// Gets the usable angles of joints for sending to NAO
         /// </summary>
-        /// <returns> array of useful angles </returns>
-        public float[] getAngles()
+        /// <returns> array of useful info </returns>
+        public float[] getInfo()
         {
             trackedBody = kinectInterface.getBody();
 
-            var angles = new float[6];
+            var info = new float[6];
 
             if (trackedBody != null)
             {
@@ -60,13 +60,50 @@ namespace NAO_Kinect
                 float spX = trackedBody.Joints[JointType.SpineBase].Position.X;
                 float spY = trackedBody.Joints[JointType.SpineBase].Position.Y;
 
-                angles[0] = angleCalc(scX, scY, spX, spY, erX, erY);
-                angles[1] = angleCalc(scX, scY, spX, spY, elX, elY);
-                angles[2] = angleCalc(elX, elY, wlX, wlY, scX, scY);
-                angles[3] = angleCalc(erX, erY, wrX, wrY, scX, scY);
+                float rightHandStatus = -1;
+                float leftHandStatus = -1;
+
+                switch (trackedBody.HandRightState)
+                {
+                    case HandState.Open:
+                        rightHandStatus = 0;
+                        break;
+                    case HandState.Closed:
+                        rightHandStatus = 1;
+                        break;
+                    case HandState.Lasso:
+                        rightHandStatus = 1;
+                        break;
+                }
+
+                switch (trackedBody.HandLeftState)
+                {
+                    case HandState.Open:
+                        leftHandStatus = 0;
+                        break;
+                    case HandState.Closed:
+                        leftHandStatus = 1;
+                        break;
+                    case HandState.Lasso:
+                        leftHandStatus = 1;
+                        break;
+                }
+
+                // Element 1 stores the right shoulder roll in radians
+                info[0] = angleCalc(scX, scY, spX, spY, erX, erY);
+                // Element 2 stores the lef shoulder roll in radians
+                info[1] = angleCalc(scX, scY, spX, spY, elX, elY);
+                // Element 3 stores the right elbow roll in radians
+                info[2] = angleCalc(elX, elY, wlX, wlY, scX, scY);
+                // Element 4 stores the left elbow roll in radians
+                info[3] = angleCalc(erX, erY, wrX, wrY, scX, scY);
+                // Element 5 stores the right hand status, -1 for unknown, 0 for open, 1 for closed
+                info[4] = rightHandStatus;
+                // Element 6 stores the left hand status, -1 for unknown, 0 for open, 1 for closed
+                info[5] = leftHandStatus; 
             }
 
-            return angles;
+            return info;
         }
 
         /// <summary>
