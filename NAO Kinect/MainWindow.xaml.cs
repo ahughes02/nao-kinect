@@ -12,23 +12,24 @@ namespace NAO_Kinect
 {
     /// <summary>
     /// This class handles all the UI logic for the application
+    /// and provides communication between the other classes
     /// </summary>
     public partial class MainWindow
     {
         /// <summary>
-        /// Class declarations
+        /// Classes
         /// </summary>
         private Motion naoMotion;
         private BodyProcessing bodyProcessing;
         private KinectInterface kinectInterface;
         
         /// <summary>
-        /// Variables for calibrating and sending angles to NAO
+        /// Variables
         /// </summary>
         private bool calibrated;
         private bool changeAngles;
-        private string rHandStatus = "none";
-        private string lHandStatus = "none";
+        private string rHandStatus = "unknown";
+        private string lHandStatus = "unkown";
         private readonly string[] jointNames = {"RShoulderRoll", "LShoulderRoll", "RElbowRoll", "LElbowRoll"};
         private float[] calibrationAngles = new float[6];
         private float[] oldAngles = new float[6];
@@ -40,7 +41,7 @@ namespace NAO_Kinect
         {
             InitializeComponent();
 
-            // call the motion constructor
+            // Call the motion constructor
             naoMotion = new Motion();
         }
 
@@ -53,15 +54,16 @@ namespace NAO_Kinect
         /// <summary>
         /// Event handler for the main UI being loaded
         /// </summary>
-        /// <param name="sender"> object that generated the event </param>
-        /// <param name="e"> any additional arguments </param>
+        /// <param name="sender"> Object that generated the event </param>
+        /// <param name="e"> Any additional arguments </param>
         private void MainWindow_Loaded(object sender, RoutedEventArgs e)
         {
+            // Creates the kinectInterface class and registers event handlers
             kinectInterface = new KinectInterface();
             kinectInterface.NewFrame += kinectInterface_NewFrame;
             kinectInterface.NewSpeech += kinectInterface_NewSpeech;
 
-            // Starts the skeletonAngles class and sends to kinectSkeleton reference to it
+            // Creates the bodyProcessing class and sends to kinectSkeleton reference to it
             bodyProcessing = new BodyProcessing(kinectInterface);
         }
 
@@ -79,10 +81,10 @@ namespace NAO_Kinect
         }
 
         /// <summary>
-        /// event handler for start button click, enables NAO connection
+        /// Event handler for start button click, enables NAO connection
         /// </summary>
-        /// <param name="sender"> object that sent the event </param>
-        /// <param name="e"> any additional arguments </param>
+        /// <param name="sender"> Object that sent the event </param>
+        /// <param name="e"> Any additional arguments </param>
         private void startButton_Click(object sender, RoutedEventArgs e)
         {
             naoMotion.connect(ipBox.Text);
@@ -94,10 +96,10 @@ namespace NAO_Kinect
         }
 
         /// <summary>
-        /// event handler for stop button click, disables NAO connection
+        /// Event handler for stop button click, disables NAO connection
         /// </summary>
-        /// <param name="sender"> object that sent the event </param>
-        /// <param name="e"> any additional arguments </param>
+        /// <param name="sender"> Object that sent the event </param>
+        /// <param name="e"> Any additional arguments </param>
         private void stopButton_Click(object sender, RoutedEventArgs e)
         {
             changeAngles = false;
@@ -120,20 +122,20 @@ namespace NAO_Kinect
         /// <summary>
         /// Event handler for new frames created by the kinectBody class
         /// </summary>
-        /// <param name="sender"> object that generated the event </param>
-        /// <param name="e"> any additional arguments </param>
+        /// <param name="sender"> Object that generated the event </param>
+        /// <param name="e"> Any additional arguments </param>
         private void kinectInterface_NewFrame(object sender, EventArgs e)
         {
-            // gets the image from kinectIntraface class and updates the image in the UI
+            // Gets the image from kinectInterface class and updates the image in the UI
             Image.Source = kinectInterface.getImage();
 
-            // gets array of info from bodyProcessing
+            // Gets array of info from bodyProcessing
             var info = bodyProcessing.getInfo();
 
-            // array to store angles with calibration
+            // Array to store angles with calibration
             var finalAngles = new float[4];
 
-            // checks for calibration flag and then updates calibration
+            // Checks for calibration flag and then updates calibration if it is set to true
             if (calibrated == false)
             {
                 for (var x = 0; x < 4; x++)
@@ -143,13 +145,13 @@ namespace NAO_Kinect
                 calibrated = true;
             }
   
-            // generate calibrated angles
+            // Generate calibrated angles
             for (var x = 0; x < 4; x++)
             {
                 finalAngles[x] = info[x] - calibrationAngles[x]; // adjustment to work with NAO robot angles
             }
 
-            // debug output, displays angles in radians
+            // Debug output, displays angles in radians
             debug1.Text = "Angle 1: " + info[0] + "\n";
             debug1.Text += "Angle 2: " + info[1] + "\n";
             debug1.Text += "Angle 3: " + info[2] + "\n";
@@ -163,11 +165,9 @@ namespace NAO_Kinect
             // Check to make sure that angle has changed enough to send new angle and update angle if it has
             for (var x = 0; x < 4; x++)
             {
-                if (changeAngles &&
-                    (Math.Abs(oldAngles[x]) - Math.Abs(finalAngles[x]) > .1 ||
-                     Math.Abs(oldAngles[x]) - Math.Abs(finalAngles[x]) < .1))
+                if (changeAngles && (Math.Abs(oldAngles[x]) - Math.Abs(finalAngles[x]) > .1 || Math.Abs(oldAngles[x]) - Math.Abs(finalAngles[x]) < .1))
                 {
-                    oldAngles[0] = finalAngles[0];
+                    oldAngles[x] = finalAngles[x];
                     updateNAO(finalAngles[x], jointNames[x]);
                 }
             }
@@ -176,46 +176,66 @@ namespace NAO_Kinect
             // ReSharper disable once CompareOfFloatsByEqualityOperator
             if (info[4] == 1 && rHandStatus != "open")
             {
-                naoMotion.openHand("RHand");
                 rHandStatus = "open";
+
+                if (!naoMotion.openHand("RHand"))
+                {
+                    debug3.Text = "Exception occured when communicating with NAO check C:\\NAO Motion\\ for details";
+                    rHandStatus = "unknown";
+                }
             }
             else if(rHandStatus != "closed")
             {
-                naoMotion.closeHand("RHand");
                 rHandStatus = "closed";
+
+                if (!naoMotion.closeHand("RHand"))
+                {
+                    debug3.Text = "Exception occured when communicating with NAO check C:\\NAO Motion\\ for details";
+                    rHandStatus = "unknown";
+                }
             }
 
             // Update left hand
             // ReSharper disable once CompareOfFloatsByEqualityOperator
             if (info[5] == 1 && lHandStatus != "open")
             {
-                naoMotion.openHand("LHand");
                 lHandStatus = "open";
+
+                if (!naoMotion.openHand("LHand"))
+                {
+                    debug3.Text = "Exception occured when communicating with NAO check C:\\NAO Motion\\ for details";
+                    lHandStatus = "unknown";
+                }
             }
             else if (lHandStatus != "closed")
             {
-                naoMotion.closeHand("LHand");
                 lHandStatus = "closed";
+
+                if (!naoMotion.closeHand("LHand"))
+                {
+                    debug3.Text = "Exception occured when communicating with NAO check C:\\NAO Motion\\ for details";
+                    lHandStatus = "unknown";
+                }
             }
         }
 
         /// <summary>
         /// Event handler for new frames created by the kinectBody class
         /// </summary>
-        /// <param name="sender"> object that generated the event </param>
-        /// <param name="e"> any additional arguments </param>
+        /// <param name="sender"> Object that generated the event </param>
+        /// <param name="e"> Any additional arguments </param>
         private void kinectInterface_NewSpeech(object sender, EventArgs e)
         {
             var result = kinectInterface.getResult();
             var semanticResult = kinectInterface.getSemanticResult();
             var confidence = kinectInterface.getConfidence();
 
-            if (confidence > 0.6) //If confidence of recognized speech is greater than 60%
+            // If confidence of recognized speech is greater than 60%
+            if (confidence > 0.6) 
             {
                 // Debug output, tells what phrase was recongnized and the confidence
                 debug2.Text = "Recognized: " + result + " \nConfidence: " + confidence;
 
-                // if statements to preform actions based on results
                 if (semanticResult == "on" && startButton.IsEnabled)
                 {
                     startButton.RaiseEvent(new RoutedEventArgs(ButtonBase.ClickEvent));
@@ -251,7 +271,10 @@ namespace NAO_Kinect
                 {
                     try
                     {
-                        naoMotion.moveJoint(1.3f, joint);
+                        if (!naoMotion.moveJoint(1.3f, joint))
+                        {
+                            debug3.Text = "Exception occured when communicating with NAO check C:\\NAO Motion\\ for details";
+                        }
                     }
                     catch (Exception)
                     { }
@@ -260,7 +283,10 @@ namespace NAO_Kinect
                 {
                     try
                     {
-                        naoMotion.moveJoint(-.3f, joint);
+                        if (!naoMotion.moveJoint(-.3f, joint))
+                        {
+                            debug3.Text = "Exception occured when communicating with NAO check C:\\NAO Motion\\ for details";
+                        }
                     }
                     catch (Exception)
                     { }
@@ -269,7 +295,10 @@ namespace NAO_Kinect
                 {
                     try
                     {
-                        naoMotion.moveJoint(angle, joint);
+                        if (!naoMotion.moveJoint(angle, joint))
+                        {
+                            debug3.Text = "Exception occured when communicating with NAO check C:\\NAO Motion\\ for details";
+                        }
                     }
                     catch (Exception)
                     { }
@@ -282,7 +311,10 @@ namespace NAO_Kinect
                 {
                     try
                     {
-                        naoMotion.moveJoint(-1.5f, joint);
+                        if (!naoMotion.moveJoint(-1.5f, joint))
+                        {
+                            debug3.Text = "Exception occured when communicating with NAO check C:\\NAO Motion\\ for details";
+                        }
                     }
                     catch (Exception)
                     { }
@@ -291,7 +323,10 @@ namespace NAO_Kinect
                 {
                     try
                     {
-                        naoMotion.moveJoint(-.03f, joint);
+                        if (!naoMotion.moveJoint(-.03f, joint))
+                        {
+                            debug3.Text = "Exception occured when communicating with NAO check C:\\NAO Motion\\ for details";
+                        }
                     }
                     catch (Exception)
                     { }
@@ -300,7 +335,10 @@ namespace NAO_Kinect
                 {
                     try
                     {
-                        naoMotion.moveJoint(angle, joint);
+                        if (!naoMotion.moveJoint(angle, joint))
+                        {
+                            debug3.Text = "Exception occured when communicating with NAO check C:\\NAO Motion\\ for details";
+                        }
                     }
                     catch (Exception)
                     { }

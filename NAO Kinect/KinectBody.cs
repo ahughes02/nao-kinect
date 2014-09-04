@@ -1,6 +1,6 @@
 ﻿/*
  * This software was developed by Austin Hughes
- * Last Modified: 2014-09-03
+ * Last Modified: 2014-09-04
  */
 
 // System imports
@@ -68,20 +68,20 @@ namespace NAO_Kinect
         /// </summary>
         public KinectBody(KinectSensor kinect)
         {
-            // set kinect sensor
+            // Set kinect sensor
             sensor = kinect;
 
-            // get the coordinate mapper
+            // Get the coordinate mapper
             coordinateMapper = sensor.CoordinateMapper;
 
-            // get the depth (display) extents
+            // Get the depth (display) extents
             FrameDescription frameDescription = sensor.DepthFrameSource.FrameDescription;
 
             // get size of joint space
             displayWidth = frameDescription.Width;
             displayHeight = frameDescription.Height;
 
-            // a bone defined as a line between two joints
+            // A bone defined as a line between two joints
             bones = new List<Tuple<JointType, JointType>>
                 {
                     // Torso
@@ -119,7 +119,7 @@ namespace NAO_Kinect
                     new Tuple<JointType, JointType>(JointType.AnkleLeft, JointType.FootLeft)
                 };
 
-            // populate body colors, one for each BodyIndex
+            // Populate body colors, one for each BodyIndex
             bodyColors = new List<Pen>
             {
                 new Pen(Brushes.Red, 6),
@@ -136,7 +136,7 @@ namespace NAO_Kinect
             // Create an image source that we can use in our image control
             imageSource = new DrawingImage(drawingGroup);
 
-            // start the body reader
+            // Start the body reader
             startBodyReader();
 
             if (bodyFrameReader != null)
@@ -153,7 +153,7 @@ namespace NAO_Kinect
         {
             try
             {
-                // open the reader for the body frames
+                // Open the reader for the body frames
                 bodyFrameReader = sensor.BodyFrameSource.OpenReader();
             }
             catch (Exception)
@@ -178,8 +178,8 @@ namespace NAO_Kinect
         /// 
         /// This code was provided by Microsoft
         /// </summary>
-        /// <param name="sender">object sending the event</param>
-        /// <param name="e">event arguments</param>
+        /// <param name="sender"> Object sending the event </param>
+        /// <param name="e"> Event arguments </param>
         private void Reader_FrameArrived(object sender, BodyFrameArrivedEventArgs e)
         {
             bool dataReceived = false;
@@ -219,12 +219,12 @@ namespace NAO_Kinect
 
                             IReadOnlyDictionary<JointType, Joint> joints = body.Joints;
 
-                            // convert the joint points to depth (display) space
+                            // Convert the joint points to depth (display) space
                             var jointPoints = new Dictionary<JointType, Point>();
 
                             foreach (JointType jointType in joints.Keys)
                             {
-                                // sometimes the depth(Z) of an inferred joint may show as negative
+                                // Sometimes the depth(Z) of an inferred joint may show as negative
                                 // clamp down to 0.1f to prevent coordinatemapper from returning (-Infinity, -Infinity)
                                 CameraSpacePoint position = joints[jointType].Position;
                                 if (position.Z < 0)
@@ -243,22 +243,22 @@ namespace NAO_Kinect
                         }
                     }
 
-                    // prevent drawing outside of our render area
+                    // Prevent drawing outside of our render area
                     drawingGroup.ClipGeometry = new RectangleGeometry(new Rect(0.0, 0.0, displayWidth, displayHeight));
                 }
             }
 
-            // calls our event
+            // Calls our event
             OnNewFrame();
         }
 
         /// <summary>
         /// Draws a body
         /// </summary>
-        /// <param name="joints">joints to draw</param>
-        /// <param name="jointPoints">translated positions of joints to draw</param>
-        /// <param name="drawingContext">drawing context to draw to</param>
-        /// <param name="drawingPen">specifies color to draw a specific body</param>
+        /// <param name="joints"> Foints to draw </param>
+        /// <param name="jointPoints"> Translated positions of joints to draw </param>
+        /// <param name="drawingContext"> Drawing context to draw to </param>
+        /// <param name="drawingPen"> Specifies color to draw a specific body </param>
         private void DrawBody(IReadOnlyDictionary<JointType, Joint> joints, IDictionary<JointType, Point> jointPoints, DrawingContext drawingContext, Pen drawingPen)
         {
             // Draw the bones
@@ -293,12 +293,12 @@ namespace NAO_Kinect
         /// <summary>
         /// Draws one bone of a body (joint to joint)
         /// </summary>
-        /// <param name="joints">joints to draw</param>
-        /// <param name="jointPoints">translated positions of joints to draw</param>
-        /// <param name="jointType0">first joint of bone to draw</param>
-        /// <param name="jointType1">second joint of bone to draw</param>
-        /// <param name="drawingContext">drawing context to draw to</param>
-        /// /// <param name="drawingPen">specifies color to draw a specific bone</param>
+        /// <param name="joints"> Foints to draw </param>
+        /// <param name="jointPoints"> Translated positions of joints to draw </param>
+        /// <param name="jointType0"> First joint of bone to draw </param>
+        /// <param name="jointType1"> Second joint of bone to draw </param>
+        /// <param name="drawingContext"> Drawing context to draw to </param>
+        /// /// <param name="drawingPen"> Specifies color to draw a specific bone </param>
         private void DrawBone(IReadOnlyDictionary<JointType, Joint> joints, IDictionary<JointType, Point> jointPoints, JointType jointType0, JointType jointType1, DrawingContext drawingContext, Pen drawingPen)
         {
             Joint joint0 = joints[jointType0];
@@ -324,9 +324,9 @@ namespace NAO_Kinect
         /// <summary>
         /// Draws a hand symbol if the hand is tracked: red circle = closed, green circle = opened; blue circle = lasso
         /// </summary>
-        /// <param name="handState">state of the hand</param>
-        /// <param name="handPosition">position of the hand</param>
-        /// <param name="drawingContext">drawing context to draw to</param>
+        /// <param name="handState"> State of the hand </param>
+        /// <param name="handPosition"> Position of the hand </param>
+        /// <param name="drawingContext"> Drawing context to draw to </param>
         private void DrawHand(HandState handState, Point handPosition, DrawingContext drawingContext)
         {
             switch (handState)
@@ -348,8 +348,8 @@ namespace NAO_Kinect
         /// <summary>
         /// Draws indicators to show which edges are clipping body data
         /// </summary>
-        /// <param name="body">body to draw clipping information for</param>
-        /// <param name="drawingContext">drawing context to draw to</param>
+        /// <param name="body"> Body to draw clipping information for </param>
+        /// <param name="drawingContext"> Drawing context to draw to </param>
         private void DrawClippedEdges(Body body, DrawingContext drawingContext)
         {
             FrameEdges clippedEdges = body.ClippedEdges;
@@ -388,7 +388,7 @@ namespace NAO_Kinect
         }
 
         /// <summary>
-        /// triggers image updated event
+        /// Triggers image updated event
         /// </summary>
         private void OnNewFrame()
         {
@@ -400,7 +400,7 @@ namespace NAO_Kinect
         }
 
         /// <summary>
-        /// used to get the current frame
+        /// Used to get the current frame
         /// </summary>
         /// <returns> current frame </returns>
         public DrawingImage getImage()
@@ -409,9 +409,9 @@ namespace NAO_Kinect
         }
 
         /// <summary>
-        /// returns the currently tracked skeleton
+        /// Returns the currently tracked skeleton
         /// </summary>
-        /// <returns> tracked skeleton </returns>
+        /// <returns> Tracked skeleton </returns>
         public Body getBody()
         {
             try

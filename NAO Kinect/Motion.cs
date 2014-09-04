@@ -1,13 +1,13 @@
 ﻿/*
  * This software was developed by Austin Hughes
- * Last Modified: 2014-09-03
+ * Last Modified: 2014-09-04
  */
 
 // System imports
 using System;
 using System.IO;
 
-// Addebaran import
+// Aldebaran import
 using Aldebaran.Proxies;
 
 namespace NAO_Kinect
@@ -35,14 +35,14 @@ namespace NAO_Kinect
             {
                 naoMotion = new MotionProxy(ip, 9559);
 
-                // give joints stiffness
+                // Give joints stiffness
                 naoMotion.stiffnessInterpolation("Head", 1.0f, 1.0f);
                 naoMotion.stiffnessInterpolation("LArm", 1.0f, 1.0f);
                 naoMotion.stiffnessInterpolation("RArm", 1.0f, 1.0f);
             }
             catch (Exception e)
             {
-                File.WriteAllText(@"C:\\NAO Motion\\exception.txt", e.ToString()); // write exepctions to text file
+                File.WriteAllText(@"C:\\NAO Motion\\exception.txt", e.ToString()); // Write exepctions to text file
             }
         }
 
@@ -58,14 +58,14 @@ namespace NAO_Kinect
             }
             try
             {
-                // reduce stiffness
+                // Reduce stiffness
                 naoMotion.stiffnessInterpolation("Head", 0.0f, 0.1f);
                 naoMotion.stiffnessInterpolation("LArm", 0.1f, 0.1f);
                 naoMotion.stiffnessInterpolation("RArm", 0.1f, 0.1f);
             }
             catch (Exception e)
             {
-                // display error message and write exceptions to a file
+                // Display error message and write exceptions to a file
                 File.WriteAllText(@"C:\\NAO Motion\\exception.txt", e.ToString());
             }
         }
@@ -73,7 +73,8 @@ namespace NAO_Kinect
         /// <summary>
         /// Opens the desired hand
         /// </summary>
-        /// <param name="hand"> the desired hand, either LHand or RHand </param>
+        /// <param name="hand"> The desired hand, either LHand or RHand </param>
+        /// <returns> True if successful, false if unsuccessful </returns>
         public bool openHand(string hand)
         {
             try
@@ -83,7 +84,7 @@ namespace NAO_Kinect
             }
             catch (Exception e)
             {
-                // display error message and write exceptions to a file
+                // Write exceptions to a file
                 File.WriteAllText(@"C:\\NAO Motion\\exception.txt", e.ToString());
                 return false;
             }
@@ -92,7 +93,8 @@ namespace NAO_Kinect
         /// <summary>
         /// Closes the desired hand
         /// </summary>
-        /// <param name="hand"> the desired hand, either LHand or RHand </param>
+        /// <param name="hand"> The desired hand, either LHand or RHand </param>
+        /// <returns> True if successful, false if unsuccessful </returns>
         public bool closeHand(string hand)
         {
             try
@@ -102,7 +104,7 @@ namespace NAO_Kinect
             }
             catch (Exception e)
             {
-                // display error message and write exceptions to a file
+                // Write exceptions to a file
                 File.WriteAllText(@"C:\\NAO Motion\\exception.txt", e.ToString());
                 return false;
             }
@@ -111,8 +113,8 @@ namespace NAO_Kinect
         /// <summary>
         /// Gets the current angle of a joint
         /// </summary>
-        /// <param name="joint"> the joint to retrieve the angle from </param>
-        /// <returns> the angle in radians </returns>
+        /// <param name="joint"> The joint to retrieve the angle from </param>
+        /// <returns> The angle in radians, -1 if unable to get angle </returns>
         public float getAngle(string joint)
         {
             try
@@ -123,7 +125,7 @@ namespace NAO_Kinect
             }
             catch (Exception e)
             {
-                // display error message and write exceptions to a file
+                // Write exceptions to a file
                 File.WriteAllText(@"C:\\NAO Motion\\exception.txt", e.ToString());
             }
 
@@ -133,8 +135,9 @@ namespace NAO_Kinect
         /// <summary>
         /// Moves the joint to the desired angle
         /// </summary>
-        /// <param name="value"> the angle in radians </param>
-        /// <param name="joint"> the joint to be moved </param>
+        /// <param name="value"> The angle in radians </param>
+        /// <param name="joint"> The joint to be moved </param>
+        /// <returns> True if successful, false if unsuccessful </returns>
         public bool moveJoint(float value, string joint)
         {
             try
@@ -144,7 +147,7 @@ namespace NAO_Kinect
             }
             catch (Exception e)
             {
-                // display error message and write exceptions to a file
+                // Write exceptions to a file
                 File.WriteAllText(@"C:\\NAO Motion\\exception.txt", e.ToString());
                 return false;
             }

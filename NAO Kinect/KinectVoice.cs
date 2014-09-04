@@ -1,6 +1,6 @@
 ﻿/*
  * This software was developed by Austin Hughes
- * Last Modified: 2013-09-03
+ * Last Modified: 2014-09-04
  */
 
 // System imports
@@ -22,17 +22,17 @@ namespace NAO_Kinect
     class KinectVoice
     {
         /// <summary>
-        /// Active Kinect sensor.
+        /// Active Kinect sensor
         /// </summary>
         private KinectSensor sensor;
 
         /// <summary>
-        /// Speech engine initialization.
+        /// Speech engine initialization
         /// </summary>
         private SpeechRecognitionEngine sre;
 
         /// <summary>
-        /// event handler for updated skeleton image
+        /// Event handler for updated speech events
         /// </summary>
         public event EventHandler SpeechEvent;
 
@@ -44,7 +44,7 @@ namespace NAO_Kinect
         float confidence;
 
         /// <summary>
-        /// class constructor, sets kinect sensor
+        /// Class constructor, sets Kinect sensor
         /// </summary>
         /// <param name="kinect"></param>
         public KinectVoice(KinectSensor kinect)
@@ -92,7 +92,7 @@ namespace NAO_Kinect
                 string[] valuesHeard = { "computer start", "computer stop", "computer calibrate" };
                 string[] valuesInterpreted = { "on", "off", "calibrate" };
 
-                var commands = new Choices();       // Initializes Choices for engine
+                var commands = new Choices(); // Initializes Choices for engine
 
                 // Adds all values in string arrays to commands for engine
                 for (var i = 0; i < valuesHeard.Length; i++)
@@ -104,7 +104,7 @@ namespace NAO_Kinect
                 var g = new Grammar(commands.ToGrammarBuilder());
                 sre.LoadGrammar(g);
 
-                // Constantly try to recognize speech
+                // Set event handler for when speech is recognized
                 sre.SpeechRecognized += SpeechRecognized;
 
                 IReadOnlyList<AudioBeam> audioBeamList = sensor.AudioSource.AudioBeams;

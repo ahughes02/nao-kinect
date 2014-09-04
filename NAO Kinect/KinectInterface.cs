@@ -1,6 +1,6 @@
 ﻿/*
  * This software was developed by Austin Hughes
- * Last Modified: 2014-09-03
+ * Last Modified: 2014-09-04
  */
 
 // System Imports
@@ -27,7 +27,7 @@ namespace NAO_Kinect
         private KinectSensor sensor;
 
         /// <summary>
-        /// Class declarations
+        /// Classes
         /// </summary>
         private KinectVoice kinectVoice;
         private KinectBody kinectBody;
@@ -113,8 +113,8 @@ namespace NAO_Kinect
         /// <summary>
         /// Event handler for new frames created by the kinectSkeleton class
         /// </summary>
-        /// <param name="sender"> object that generated the event </param>
-        /// <param name="e"> any additional arguments </param>
+        /// <param name="sender"> Object that generated the event </param>
+        /// <param name="e"> Any additional arguments </param>
         private void kinectBody_NewFrame(object sender, EventArgs e)
         {
             image = kinectBody.getImage();
@@ -128,11 +128,11 @@ namespace NAO_Kinect
         /// <summary>
         /// Event handler for speech events
         /// </summary>
-        /// <param name="sender"> object that sent the event </param>
-        /// <param name="e"> any additional arguments </param>
+        /// <param name="sender"> Object that sent the event </param>
+        /// <param name="e"> Any additional arguments </param>
         private void kinectVoice_NewSpeech(object sender, EventArgs e)
         {
-            // variables for heard speech, final speech result, and confidence
+            // Variables for recongized speech, final speech result, and confidence
             result = kinectVoice.getResult();
             semanticResult = kinectVoice.getSemanticResult();
             confidence = kinectVoice.getConfidence();
@@ -146,8 +146,8 @@ namespace NAO_Kinect
         /// <summary>
         /// Handles the event which the sensor becomes unavailable (E.g. paused, closed, unplugged).
         /// </summary>
-        /// <param name="sender">object sending the event</param>
-        /// <param name="e">event arguments</param>
+        /// <param name="sender"> Object sending the event </param>
+        /// <param name="e"> Event arguments </param>
         private void Sensor_IsAvailableChanged(object sender, IsAvailableChangedEventArgs e)
         {
             end();

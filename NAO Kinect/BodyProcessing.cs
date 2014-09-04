@@ -1,6 +1,6 @@
 ﻿/*
  * This software was developed by Austin Hughes
- * Last Modified: 2013-09-04
+ * Last Modified: 2014-09-04
  */
 
 // System imports
@@ -25,7 +25,7 @@ namespace NAO_Kinect
         /// <summary>
         /// Class constructor
         /// </summary>
-        /// <param name="interfaceClass"> reference to current kinect interface </param>
+        /// <param name="interfaceClass"> Reference to current kinect interface </param>
         public BodyProcessing(KinectInterface interfaceClass)
         {
             kinectInterface = interfaceClass;
@@ -34,7 +34,7 @@ namespace NAO_Kinect
         /// <summary>
         /// Gets the usable angles of joints for sending to NAO
         /// </summary>
-        /// <returns> array of useful info </returns>
+        /// <returns> Array of useful info </returns>
         public float[] getInfo()
         {
             trackedBody = kinectInterface.getBody();
@@ -115,7 +115,7 @@ namespace NAO_Kinect
         /// <param name="p2Y"> Y coordinate of point 2 </param>
         /// <param name="p3X"> X coordinate of point 3 </param>
         /// <param name="p3Y"> Y coordinate of point 3 </param>
-        /// <returns> angle calculated </returns>
+        /// <returns> Angle calculated </returns>
         private float angleCalc(float p1X, float p1Y, float p2X, float p2Y, float p3X, float p3Y)
         {
             var p12 = (float)Math.Sqrt(((p1X - p2X) * (p1X - p2X)) + ((p1Y - p2Y) * (p1Y - p2Y)));
