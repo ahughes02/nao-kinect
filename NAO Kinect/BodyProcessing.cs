@@ -14,7 +14,7 @@ namespace NAO_Kinect
     /// <summary>
     /// This class takes a tracked body and generates the angles between joints
     /// </summary>
-    class BodyAngles
+    class BodyProcessing
     {
         /// <summary>
         /// Holds the skeleton class and the body we want angles for
@@ -26,7 +26,7 @@ namespace NAO_Kinect
         /// Class constructor
         /// </summary>
         /// <param name="interfaceClass"> reference to current kinect interface </param>
-        public BodyAngles(KinectInterface interfaceClass)
+        public BodyProcessing(KinectInterface interfaceClass)
         {
             kinectInterface = interfaceClass;
         }

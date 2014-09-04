@@ -19,7 +19,7 @@ namespace NAO_Kinect
         /// Class declarations
         /// </summary>
         private Motion naoMotion;
-        private BodyAngles bodyAngles;
+        private BodyProcessing bodyAngles;
         private KinectInterface kinectInterface;
         
         /// <summary>
@@ -59,7 +59,7 @@ namespace NAO_Kinect
             kinectInterface.NewSpeech += kinectInterface_NewSpeech;
 
             // Starts the skeletonAngles class and sends to kinectSkeleton reference to it
-            bodyAngles = new BodyAngles(kinectInterface);
+            bodyAngles = new BodyProcessing(kinectInterface);
         }
 
         /// <summary>
