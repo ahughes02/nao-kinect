@@ -68,9 +68,10 @@ namespace NAO_Kinect
         {
             // Creates the kinectInterface class and registers event handlers
             kinectInterface = new KinectInterface();
-            kinectThread = new Thread(kinectInterface.start);
+            kinectInterface.start();
+           // kinectThread = new Thread(kinectInterface.start);
 
-            kinectThread.Start();
+            //kinectThread.Start();
 
             kinectInterface.NewFrame += kinectInterface_NewFrame;
             kinectInterface.NewSpeech += kinectInterface_NewSpeech;
@@ -223,6 +224,9 @@ namespace NAO_Kinect
                 debug1.Text += "Calibrated LSR:\t " + finalAngles[1] + "\n";
                 debug1.Text += "Calibrated RER:\t " + finalAngles[2] + "\n";
                 debug1.Text += "Calibrated LER:\t " + finalAngles[3] + "\n";
+                debug1.Text += "----------------------\n";
+                debug1.Text += "Right Hand Status:\t " + info.RHandOpen + "\n";
+                debug1.Text += "Left Hand Status:\t " + info.LHandOpen + "\n";
 
                 // Check to make sure that angle has changed enough to send new angle and update angle if it has
                 for (var x = 0; x < 4; x++)
