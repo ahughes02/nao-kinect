@@ -68,12 +68,9 @@ namespace NAO_Kinect
         {
             // Creates the kinectInterface class and registers event handlers
             kinectInterface = new KinectInterface();
-
             kinectThread = new Thread(kinectInterface.start);
 
             kinectThread.Start();
-
-            kinectInterface.start();
 
             kinectInterface.NewFrame += kinectInterface_NewFrame;
             kinectInterface.NewSpeech += kinectInterface_NewSpeech;
