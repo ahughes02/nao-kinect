@@ -81,7 +81,7 @@ namespace NAO_Kinect
         {
             if (sensor != null)
             {
-                sensor.Close();
+                //sensor.Close();
             }
         }
 
@@ -150,7 +150,7 @@ namespace NAO_Kinect
         /// <param name="e"> Event arguments </param>
         private void Sensor_IsAvailableChanged(object sender, IsAvailableChangedEventArgs e)
         {
-            end();
+            // Do nothing for now
         }
     }
 }

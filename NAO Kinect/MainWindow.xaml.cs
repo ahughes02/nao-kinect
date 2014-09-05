@@ -152,15 +152,15 @@ namespace NAO_Kinect
             }
 
             // Debug output, displays angles in radians
-            debug1.Text = "Angle 1: " + info[0] + "\n";
-            debug1.Text += "Angle 2: " + info[1] + "\n";
-            debug1.Text += "Angle 3: " + info[2] + "\n";
-            debug1.Text += "Angle 4: " + info[3] + "\n";
-            debug1.Text += "------------------------\n";
-            debug1.Text += "Calibrated Angle 1: " + finalAngles[0] + "\n";
-            debug1.Text += "Calibrated Angle 2: " + finalAngles[1] + "\n";
-            debug1.Text += "Calibrated Angle 3: " + finalAngles[2] + "\n";
-            debug1.Text += "Calibrated Angle 4: " + finalAngles[3] + "\n";
+            debug1.Text = "RShoulder Roll:\t " + info[0] + "\n";
+            debug1.Text += "LShoulder Roll:\t " + info[1] + "\n";
+            debug1.Text += "RElbow Roll:\t " + info[2] + "\n";
+            debug1.Text += "LElbow Roll:\t " + info[3] + "\n";
+            debug1.Text += "----------------------\n";
+            debug1.Text += "Calibrated RSR:\t " + finalAngles[0] + "\n";
+            debug1.Text += "Calibrated LSR:\t " + finalAngles[1] + "\n";
+            debug1.Text += "Calibrated RER:\t " + finalAngles[2] + "\n";
+            debug1.Text += "Calibrated LER:\t " + finalAngles[3] + "\n";
 
             // Check to make sure that angle has changed enough to send new angle and update angle if it has
             for (var x = 0; x < 4; x++)
@@ -174,7 +174,7 @@ namespace NAO_Kinect
 
             // Update right hand
             // ReSharper disable once CompareOfFloatsByEqualityOperator
-            if (info[4] == 1 && rHandStatus != "open")
+            if (changeAngles && info[4] == 1 && rHandStatus != "open")
             {
                 rHandStatus = "open";
 
@@ -184,7 +184,9 @@ namespace NAO_Kinect
                     rHandStatus = "unknown";
                 }
             }
-            else if(rHandStatus != "closed")
+            
+            // ReSharper disable once CompareOfFloatsByEqualityOperator
+            if (changeAngles && info[4] == 0 && rHandStatus != "closed")
             {
                 rHandStatus = "closed";
 
@@ -197,7 +199,7 @@ namespace NAO_Kinect
 
             // Update left hand
             // ReSharper disable once CompareOfFloatsByEqualityOperator
-            if (info[5] == 1 && lHandStatus != "open")
+            if (changeAngles && info[5] == 1 && lHandStatus != "open")
             {
                 lHandStatus = "open";
 
@@ -207,7 +209,7 @@ namespace NAO_Kinect
                     lHandStatus = "unknown";
                 }
             }
-            else if (lHandStatus != "closed")
+            else if (changeAngles && lHandStatus != "closed")
             {
                 lHandStatus = "closed";
 
