@@ -46,10 +46,16 @@ namespace NAO_Kinect
         public event NewFrameEventHandler NewFrame;
         public event NewSpeechEventHandler NewSpeech;
 
-        public KinectInterface()
+        ~KinectInterface()
+        {
+            end();
+        }
+
+        public void start()
         {
             // Get the Kinect Sensor
             sensor = KinectSensor.GetDefault();
+
             try
             {
                 sensor.Open();
@@ -71,12 +77,6 @@ namespace NAO_Kinect
             // Enables voice reconginition
             kinectVoice.startVoiceRecognition();
         }
-
-        ~KinectInterface()
-        {
-            end();
-        }
-
         public void end()
         {
             if (sensor != null)

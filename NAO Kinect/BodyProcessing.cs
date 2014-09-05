@@ -19,8 +19,15 @@ namespace NAO_Kinect
         /// <summary>
         /// Holds the KinectInterface class and the body we want angles for
         /// </summary>
-        private KinectInterface kinectInterface;
-        private Body trackedBody;
+        private static KinectInterface kinectInterface;
+        private static Body trackedBody;
+
+        internal struct bodyInfo
+        {
+            public float[] angles;
+            public bool RHandOpen;
+            public bool LHandOpen;
+        };
 
         /// <summary>
         /// Class constructor
@@ -35,75 +42,70 @@ namespace NAO_Kinect
         /// Gets the usable angles of joints for sending to NAO
         /// </summary>
         /// <returns> Array of useful info </returns>
-        public float[] getInfo()
+        public bodyInfo getInfo()
         {
             trackedBody = kinectInterface.getBody();
 
-            var info = new float[6];
+            var bodyInfo = new bodyInfo();
 
             if (trackedBody != null)
             {
-                float wlY = trackedBody.Joints[JointType.WristLeft].Position.Y;
-                float wlX = trackedBody.Joints[JointType.WristLeft].Position.X;
-                float wrY = trackedBody.Joints[JointType.WristRight].Position.Y;
-                float wrX = trackedBody.Joints[JointType.WristRight].Position.X;
+                var wlY = trackedBody.Joints[JointType.WristLeft].Position.Y;
+                var wlX = trackedBody.Joints[JointType.WristLeft].Position.X;
+                var wrY = trackedBody.Joints[JointType.WristRight].Position.Y;
+                var wrX = trackedBody.Joints[JointType.WristRight].Position.X;
 
-                float scX = trackedBody.Joints[JointType.SpineShoulder].Position.X;
-                float scY = trackedBody.Joints[JointType.SpineShoulder].Position.Y;
+                var scX = trackedBody.Joints[JointType.SpineShoulder].Position.X;
+                var scY = trackedBody.Joints[JointType.SpineShoulder].Position.Y;
 
-                float elX = trackedBody.Joints[JointType.ElbowLeft].Position.X;
-                float elY = trackedBody.Joints[JointType.ElbowLeft].Position.Y;
+                var elX = trackedBody.Joints[JointType.ElbowLeft].Position.X;
+                var elY = trackedBody.Joints[JointType.ElbowLeft].Position.Y;
 
-                float erX = trackedBody.Joints[JointType.ElbowRight].Position.X;
-                float erY = trackedBody.Joints[JointType.ElbowRight].Position.Y;
+                var erX = trackedBody.Joints[JointType.ElbowRight].Position.X;
+                var erY = trackedBody.Joints[JointType.ElbowRight].Position.Y;
 
-                float spX = trackedBody.Joints[JointType.SpineBase].Position.X;
-                float spY = trackedBody.Joints[JointType.SpineBase].Position.Y;
-
-                float rightHandStatus = -1;
-                float leftHandStatus = -1;
+                var spX = trackedBody.Joints[JointType.SpineBase].Position.X;
+                var spY = trackedBody.Joints[JointType.SpineBase].Position.Y;
 
                 switch (trackedBody.HandRightState)
                 {
                     case HandState.Open:
-                        rightHandStatus = 0;
+                        bodyInfo.RHandOpen = true;
                         break;
                     case HandState.Closed:
-                        rightHandStatus = 1;
+                        bodyInfo.RHandOpen = false;
                         break;
                     case HandState.Lasso:
-                        rightHandStatus = 1;
+                        bodyInfo.RHandOpen = false;
                         break;
                 }
 
                 switch (trackedBody.HandLeftState)
                 {
                     case HandState.Open:
-                        leftHandStatus = 0;
+                        bodyInfo.LHandOpen = true;
                         break;
                     case HandState.Closed:
-                        leftHandStatus = 1;
+                        bodyInfo.LHandOpen = false;
                         break;
                     case HandState.Lasso:
-                        leftHandStatus = 1;
+                        bodyInfo.LHandOpen = false;
                         break;
                 }
 
-                // Element 1 stores the right shoulder roll in radians
-                info[0] = angleCalc(scX, scY, spX, spY, erX, erY);
-                // Element 2 stores the lef shoulder roll in radians
-                info[1] = angleCalc(scX, scY, spX, spY, elX, elY);
-                // Element 3 stores the right elbow roll in radians
-                info[2] = angleCalc(elX, elY, wlX, wlY, scX, scY);
-                // Element 4 stores the left elbow roll in radians
-                info[3] = angleCalc(erX, erY, wrX, wrY, scX, scY);
-                // Element 5 stores the right hand status, -1 for unknown, 0 for open, 1 for closed
-                info[4] = rightHandStatus;
-                // Element 6 stores the left hand status, -1 for unknown, 0 for open, 1 for closed
-                info[5] = leftHandStatus; 
+                bodyInfo.angles = new float[4];
+
+                // Stores the right shoulder roll in radians
+                bodyInfo.angles[0] = angleCalc(scX, scY, spX, spY, erX, erY);
+                // Stores the lef shoulder roll in radians
+                bodyInfo.angles[1] = angleCalc(scX, scY, spX, spY, elX, elY);
+                // Stores the right elbow roll in radians
+                bodyInfo.angles[2] = angleCalc(elX, elY, wlX, wlY, scX, scY);
+                // Stores the left elbow roll in radians
+                bodyInfo.angles[3] = angleCalc(erX, erY, wrX, wrY, scX, scY);
             }
 
-            return info;
+            return bodyInfo;
         }
 
         /// <summary>
@@ -116,7 +118,7 @@ namespace NAO_Kinect
         /// <param name="p3X"> X coordinate of point 3 </param>
         /// <param name="p3Y"> Y coordinate of point 3 </param>
         /// <returns> Angle calculated </returns>
-        private float angleCalc(float p1X, float p1Y, float p2X, float p2Y, float p3X, float p3Y)
+        private static float angleCalc(float p1X, float p1Y, float p2X, float p2Y, float p3X, float p3Y)
         {
             var p12 = (float)Math.Sqrt(((p1X - p2X) * (p1X - p2X)) + ((p1Y - p2Y) * (p1Y - p2Y)));
             var p13 = (float)Math.Sqrt(((p1X - p3X) * (p1X - p3X)) + ((p1Y - p3Y) * (p1Y - p3Y)));

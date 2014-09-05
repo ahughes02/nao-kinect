@@ -5,8 +5,10 @@
 
 // System Imports
 using System;
+using System.Threading;
 using System.Windows;
 using System.Windows.Controls.Primitives;
+using System.Windows.Threading;
 
 namespace NAO_Kinect
 {
@@ -22,6 +24,7 @@ namespace NAO_Kinect
         private Motion naoMotion;
         private BodyProcessing bodyProcessing;
         private KinectInterface kinectInterface;
+        private Thread kinectThread;
         
         /// <summary>
         /// Variables
@@ -34,6 +37,11 @@ namespace NAO_Kinect
         private float[] calibrationAngles = new float[6];
         private float[] oldAngles = new float[6];
 
+        /// <summary>
+        /// Timer 
+        /// </summary>
+        private DispatcherTimer motionTimer = new DispatcherTimer();
+        
         /// <summary>
         /// Class constructor
         /// </summary>
@@ -60,11 +68,24 @@ namespace NAO_Kinect
         {
             // Creates the kinectInterface class and registers event handlers
             kinectInterface = new KinectInterface();
+
+            kinectThread = new Thread(kinectInterface.start);
+
+            kinectThread.Start();
+
+            kinectInterface.start();
+
             kinectInterface.NewFrame += kinectInterface_NewFrame;
             kinectInterface.NewSpeech += kinectInterface_NewSpeech;
 
             // Creates the bodyProcessing class and sends to kinectSkeleton reference to it
             bodyProcessing = new BodyProcessing(kinectInterface);
+
+            // Create a timer for event based NAO update. 
+            motionTimer.Interval = new TimeSpan(0, 0, 0, 0, (int)Math.Ceiling(1000.0 / 1));
+            motionTimer.Start();
+
+            motionTimer.Tick += motionTimer_Tick;
         }
 
         /// <summary>
@@ -77,6 +98,7 @@ namespace NAO_Kinect
             if (kinectInterface != null)
             {
                 kinectInterface.end();
+                kinectThread.Abort();
             }
         }
 
@@ -128,97 +150,6 @@ namespace NAO_Kinect
         {
             // Gets the image from kinectInterface class and updates the image in the UI
             Image.Source = kinectInterface.getImage();
-
-            // Gets array of info from bodyProcessing
-            var info = bodyProcessing.getInfo();
-
-            // Array to store angles with calibration
-            var finalAngles = new float[4];
-
-            // Checks for calibration flag and then updates calibration if it is set to true
-            if (calibrated == false)
-            {
-                for (var x = 0; x < 4; x++)
-                {
-                    calibrationAngles[x] = info[x];
-                }
-                calibrated = true;
-            }
-  
-            // Generate calibrated angles
-            for (var x = 0; x < 4; x++)
-            {
-                finalAngles[x] = info[x] - calibrationAngles[x]; // adjustment to work with NAO robot angles
-            }
-
-            // Debug output, displays angles in radians
-            debug1.Text = "RShoulder Roll:\t " + info[0] + "\n";
-            debug1.Text += "LShoulder Roll:\t " + info[1] + "\n";
-            debug1.Text += "RElbow Roll:\t " + info[2] + "\n";
-            debug1.Text += "LElbow Roll:\t " + info[3] + "\n";
-            debug1.Text += "----------------------\n";
-            debug1.Text += "Calibrated RSR:\t " + finalAngles[0] + "\n";
-            debug1.Text += "Calibrated LSR:\t " + finalAngles[1] + "\n";
-            debug1.Text += "Calibrated RER:\t " + finalAngles[2] + "\n";
-            debug1.Text += "Calibrated LER:\t " + finalAngles[3] + "\n";
-
-            // Check to make sure that angle has changed enough to send new angle and update angle if it has
-            for (var x = 0; x < 4; x++)
-            {
-                if (changeAngles && (Math.Abs(oldAngles[x]) - Math.Abs(finalAngles[x]) > .1 || Math.Abs(oldAngles[x]) - Math.Abs(finalAngles[x]) < .1))
-                {
-                    oldAngles[x] = finalAngles[x];
-                    updateNAO(finalAngles[x], jointNames[x]);
-                }
-            }
-
-            // Update right hand
-            // ReSharper disable once CompareOfFloatsByEqualityOperator
-            if (changeAngles && info[4] == 1 && rHandStatus != "open")
-            {
-                rHandStatus = "open";
-
-                if (!naoMotion.openHand("RHand"))
-                {
-                    debug3.Text = "Exception occured when communicating with NAO check C:\\NAO Motion\\ for details";
-                    rHandStatus = "unknown";
-                }
-            }
-            
-            // ReSharper disable once CompareOfFloatsByEqualityOperator
-            if (changeAngles && info[4] == 0 && rHandStatus != "closed")
-            {
-                rHandStatus = "closed";
-
-                if (!naoMotion.closeHand("RHand"))
-                {
-                    debug3.Text = "Exception occured when communicating with NAO check C:\\NAO Motion\\ for details";
-                    rHandStatus = "unknown";
-                }
-            }
-
-            // Update left hand
-            // ReSharper disable once CompareOfFloatsByEqualityOperator
-            if (changeAngles && info[5] == 1 && lHandStatus != "open")
-            {
-                lHandStatus = "open";
-
-                if (!naoMotion.openHand("LHand"))
-                {
-                    debug3.Text = "Exception occured when communicating with NAO check C:\\NAO Motion\\ for details";
-                    lHandStatus = "unknown";
-                }
-            }
-            else if (changeAngles && lHandStatus != "closed")
-            {
-                lHandStatus = "closed";
-
-                if (!naoMotion.closeHand("LHand"))
-                {
-                    debug3.Text = "Exception occured when communicating with NAO check C:\\NAO Motion\\ for details";
-                    lHandStatus = "unknown";
-                }
-            }
         }
 
         /// <summary>
@@ -257,6 +188,108 @@ namespace NAO_Kinect
             {
                 debug2.Text = "Rejected " + " \nConfidence: " + confidence;
             }
+        }
+
+        private void motionTimer_Tick(object sender, EventArgs e)
+        {
+            // Gets array of info from bodyProcessing
+            var info = bodyProcessing.getInfo();
+
+            // Array to store angles with calibration
+            var finalAngles = new float[4];
+
+            try
+            {
+                // Checks for calibration flag and then updates calibration if it is set to true
+                if (calibrated == false)
+                {
+                    for (var x = 0; x < 4; x++)
+                    {
+                        calibrationAngles[x] = info.angles[x];
+                    }
+                    calibrated = true;
+                }
+
+                // Generate calibrated angles
+                for (var x = 0; x < 4; x++)
+                {
+                    finalAngles[x] = info.angles[x] - calibrationAngles[x]; // adjustment to work with NAO robot angles
+                }
+
+                // Debug output, displays angles in radians
+                debug1.Text = "RShoulder Roll:\t " + info.angles[0] + "\n";
+                debug1.Text += "LShoulder Roll:\t " + info.angles[1] + "\n";
+                debug1.Text += "RElbow Roll:\t " + info.angles[2] + "\n";
+                debug1.Text += "LElbow Roll:\t " + info.angles[3] + "\n";
+                debug1.Text += "----------------------\n";
+                debug1.Text += "Calibrated RSR:\t " + finalAngles[0] + "\n";
+                debug1.Text += "Calibrated LSR:\t " + finalAngles[1] + "\n";
+                debug1.Text += "Calibrated RER:\t " + finalAngles[2] + "\n";
+                debug1.Text += "Calibrated LER:\t " + finalAngles[3] + "\n";
+
+                // Check to make sure that angle has changed enough to send new angle and update angle if it has
+                for (var x = 0; x < 4; x++)
+                {
+                    if (changeAngles &&
+                        (Math.Abs(oldAngles[x]) - Math.Abs(finalAngles[x]) > .1 ||
+                         Math.Abs(oldAngles[x]) - Math.Abs(finalAngles[x]) < .1))
+                    {
+                        oldAngles[x] = finalAngles[x];
+                        updateNAO(finalAngles[x], jointNames[x]);
+                    }
+                }
+
+                // Update right hand
+                // ReSharper disable once CompareOfFloatsByEqualityOperator
+                if (changeAngles && info.RHandOpen && rHandStatus != "open")
+                {
+                    rHandStatus = "open";
+
+                    if (!naoMotion.openHand("RHand"))
+                    {
+                        debug3.Text = "Exception occured when communicating with NAO check C:\\NAO Motion\\ for details";
+                        rHandStatus = "unknown";
+                    }
+                }
+
+                // ReSharper disable once CompareOfFloatsByEqualityOperator
+                if (changeAngles && !info.RHandOpen && rHandStatus != "closed")
+                {
+                    rHandStatus = "closed";
+
+                    if (!naoMotion.closeHand("RHand"))
+                    {
+                        debug3.Text = "Exception occured when communicating with NAO check C:\\NAO Motion\\ for details";
+                        rHandStatus = "unknown";
+                    }
+                }
+
+                // Update left hand
+                // ReSharper disable once CompareOfFloatsByEqualityOperator
+                if (changeAngles && info.LHandOpen && lHandStatus != "open")
+                {
+                    lHandStatus = "open";
+
+                    if (!naoMotion.openHand("LHand"))
+                    {
+                        debug3.Text = "Exception occured when communicating with NAO check C:\\NAO Motion\\ for details";
+                        lHandStatus = "unknown";
+                    }
+                }
+
+                if (changeAngles && !info.LHandOpen && lHandStatus != "closed")
+                {
+                    lHandStatus = "closed";
+
+                    if (!naoMotion.closeHand("LHand"))
+                    {
+                        debug3.Text = "Exception occured when communicating with NAO check C:\\NAO Motion\\ for details";
+                        lHandStatus = "unknown";
+                    }
+                }
+            }
+            catch(Exception)
+            { }
         }
 
         /// ********************************************************
