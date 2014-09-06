@@ -36,6 +36,12 @@ namespace NAO_Kinect
         private readonly string[] jointNames = {"RShoulderRoll", "LShoulderRoll", "RElbowRoll", "LElbowRoll"};
         private float[] calibrationAngles = new float[6];
         private float[] oldAngles = new float[6];
+        private float[] finalAngles = new float[4];
+
+        /// <summary>
+        /// Data structures
+        /// </summary>
+        private NAO_Kinect.BodyProcessing.BodyInfo info;
 
         /// <summary>
         /// Timer 
@@ -80,7 +86,7 @@ namespace NAO_Kinect
             bodyProcessing = new BodyProcessing(kinectInterface);
 
             // Create a timer for event based NAO update. 
-            motionTimer.Interval = new TimeSpan(0, 0, 0, 0, (int)Math.Ceiling(1000.0 / 1));
+            motionTimer.Interval = new TimeSpan(0, 0, 0, 0, (int)Math.Ceiling(1000.0 / 3));
             motionTimer.Start();
 
             motionTimer.Tick += motionTimer_Tick;
@@ -191,12 +197,9 @@ namespace NAO_Kinect
         private void motionTimer_Tick(object sender, EventArgs e)
         {
             // Gets array of info from bodyProcessing
-            var info = bodyProcessing.getInfo();
+            info = bodyProcessing.getInfo();
 
-            // Array to store angles with calibration
-            var finalAngles = new float[4];
-
-            try
+            if (!info.noTrackedBody)
             {
                 // Checks for calibration flag and then updates calibration if it is set to true
                 if (calibrated == false)
@@ -231,16 +234,9 @@ namespace NAO_Kinect
                 // Check to make sure that angle has changed enough to send new angle and update angle if it has
                 for (var x = 0; x < 4; x++)
                 {
-                    /*if (changeAngles &&
-                        (Math.Abs(oldAngles[x]) - Math.Abs(finalAngles[x]) > .1 ||
-                         Math.Abs(oldAngles[x]) - Math.Abs(finalAngles[x]) < .1))
+                    if (changeAngles && (Math.Abs(oldAngles[x]) - Math.Abs(finalAngles[x]) > .03 || Math.Abs(oldAngles[x]) - Math.Abs(finalAngles[x]) < .03))
                     {
                         oldAngles[x] = finalAngles[x];
-                        updateNAO(finalAngles[x], jointNames[x]);
-                    }*/
-
-                    if (changeAngles)
-                    {
                         updateNAO(finalAngles[x], jointNames[x]);
                     }
                 }
@@ -294,8 +290,10 @@ namespace NAO_Kinect
                     }
                 }
             }
-            catch(Exception)
-            { }
+            else
+            {
+                debug1.Text = "No currently tracked body";
+            }
         }
 
         /// ********************************************************

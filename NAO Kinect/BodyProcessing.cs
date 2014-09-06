@@ -17,17 +17,22 @@ namespace NAO_Kinect
     class BodyProcessing
     {
         /// <summary>
-        /// Holds the KinectInterface class and the body we want angles for
+        /// Struct to return all relevant data to other classes
         /// </summary>
-        private static KinectInterface kinectInterface;
-        private static Body trackedBody;
-
-        internal struct bodyInfo
+        internal struct BodyInfo
         {
             public float[] angles;
             public bool RHandOpen;
             public bool LHandOpen;
+            public bool noTrackedBody;
         };
+
+        /// <summary>
+        /// Holds the KinectInterface class and the body we want angles for
+        /// </summary>
+        private static KinectInterface kinectInterface;
+        private static Body trackedBody;
+        BodyInfo bodyInfo;
 
         /// <summary>
         /// Class constructor
@@ -36,20 +41,23 @@ namespace NAO_Kinect
         public BodyProcessing(KinectInterface interfaceClass)
         {
             kinectInterface = interfaceClass;
+
+            bodyInfo = new BodyInfo();
+            bodyInfo.angles = new float[4];
         }
 
         /// <summary>
         /// Gets the usable angles of joints for sending to NAO
         /// </summary>
         /// <returns> Array of useful info </returns>
-        public bodyInfo getInfo()
+        public BodyInfo getInfo()
         {
             trackedBody = kinectInterface.getBody();
 
-            var bodyInfo = new bodyInfo();
-
             if (trackedBody != null)
             {
+                bodyInfo.noTrackedBody = false;
+
                 var wlY = trackedBody.Joints[JointType.WristLeft].Position.Y;
                 var wlX = trackedBody.Joints[JointType.WristLeft].Position.X;
                 var wrY = trackedBody.Joints[JointType.WristRight].Position.Y;
@@ -93,8 +101,6 @@ namespace NAO_Kinect
                         break;
                 }
 
-                bodyInfo.angles = new float[4];
-
                 // Stores the right shoulder roll in radians
                 bodyInfo.angles[0] = angleCalc(scX, scY, spX, spY, erX, erY);
                 // Stores the lef shoulder roll in radians
@@ -104,7 +110,10 @@ namespace NAO_Kinect
                 // Stores the left elbow roll in radians
                 bodyInfo.angles[3] = angleCalc(erX, erY, wrX, wrY, scX, scY);
             }
-
+            else
+            {
+                bodyInfo.noTrackedBody = true;
+            }
             return bodyInfo;
         }
 
