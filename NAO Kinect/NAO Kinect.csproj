@@ -93,6 +93,7 @@
       <DependentUpon>App.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="KinectAudioStream.cs" />
     <Compile Include="KinectInterface.cs" />
     <Compile Include="KinectBody.cs" />
     <Compile Include="KinectVoice.cs" />

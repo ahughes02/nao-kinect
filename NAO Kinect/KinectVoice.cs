@@ -37,6 +37,11 @@ namespace NAO_Kinect
         public event EventHandler SpeechEvent;
 
         /// <summary>
+        /// Stream for 32b-16b conversion.
+        /// </summary>
+        private KinectAudioStream convertStream = null;
+
+        /// <summary>
         /// Variables to hold results of speech
         /// </summary>
         string result;
@@ -101,7 +106,11 @@ namespace NAO_Kinect
                 }
 
                 // Submits commands to Grammar Builder for engine
-                var g = new Grammar(commands.ToGrammarBuilder());
+                var gb = new GrammarBuilder {Culture = ri.Culture};
+                gb.Append(commands);
+
+                var g = new Grammar(gb);
+
                 sre.LoadGrammar(g);
 
                 // Set event handler for when speech is recognized
@@ -110,13 +119,34 @@ namespace NAO_Kinect
                 IReadOnlyList<AudioBeam> audioBeamList = sensor.AudioSource.AudioBeams;
                 Stream audioStream = audioBeamList[0].OpenInputStream();
 
+                // create the convert stream
+                convertStream = new KinectAudioStream(audioStream);
+
+                convertStream.SpeechActive = true;
+
                 // Tells the speech engine where to find the audio stream
-                sre.SetInputToAudioStream(audioStream, new SpeechAudioFormatInfo(EncodingFormat.Pcm, 16000, 16, 1, 32000, 2, null));
+                sre.SetInputToAudioStream(convertStream, new SpeechAudioFormatInfo(EncodingFormat.Pcm, 16000, 16, 1, 32000, 2, null));
                 sre.RecognizeAsync(RecognizeMode.Multiple);
             }
             catch (Exception e) // Catch to make sure if no Kinect is found program does not crash
             {
                 MessageBox.Show("Error starting audio stream: " + e.Message);
+            }
+        }
+
+        public void end()
+        {
+            if (null != this.convertStream)
+            {
+                convertStream.SpeechActive = false;
+                convertStream.Dispose();
+            }
+
+            if (null != sre)
+            {
+                sre.SpeechRecognized -= this.SpeechRecognized;
+                sre.RecognizeAsyncStop();
+                sre.Dispose();
             }
         }
 

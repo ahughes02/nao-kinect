@@ -83,6 +83,8 @@ namespace NAO_Kinect
             {
                 //sensor.Close();
             }
+
+            kinectVoice.end();
         }
 
         public Body getBody()
