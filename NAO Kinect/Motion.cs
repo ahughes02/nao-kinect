@@ -59,9 +59,9 @@ namespace NAO_Kinect
             try
             {
                 // Reduce stiffness
-                naoMotion.stiffnessInterpolation("Head", 0.0f, 0.1f);
-                naoMotion.stiffnessInterpolation("LArm", 0.1f, 0.1f);
-                naoMotion.stiffnessInterpolation("RArm", 0.1f, 0.1f);
+                naoMotion.stiffnessInterpolation("Head", 0.0f, 0.0f);
+                naoMotion.stiffnessInterpolation("LArm", 0.0f, 0.0f);
+                naoMotion.stiffnessInterpolation("RArm", 0.0f, 0.0f);
             }
             catch (Exception e)
             {
@@ -142,7 +142,7 @@ namespace NAO_Kinect
         {
             try
             {
-                naoMotion.setAngles(joint, value, 0.1f);
+                naoMotion.setAngles(joint, value, 0.05f);
                 return true;
             }
             catch (Exception e)

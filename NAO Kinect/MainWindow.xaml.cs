@@ -225,17 +225,22 @@ namespace NAO_Kinect
                 debug1.Text += "Calibrated RER:\t " + finalAngles[2] + "\n";
                 debug1.Text += "Calibrated LER:\t " + finalAngles[3] + "\n";
                 debug1.Text += "----------------------\n";
-                debug1.Text += "Right Hand Status:\t " + info.RHandOpen + "\n";
-                debug1.Text += "Left Hand Status:\t " + info.LHandOpen + "\n";
+                debug1.Text += "RHand Status:\t " + info.RHandOpen + "\n";
+                debug1.Text += "LHand Status:\t " + info.LHandOpen + "\n";
 
                 // Check to make sure that angle has changed enough to send new angle and update angle if it has
                 for (var x = 0; x < 4; x++)
                 {
-                    if (changeAngles &&
+                    /*if (changeAngles &&
                         (Math.Abs(oldAngles[x]) - Math.Abs(finalAngles[x]) > .1 ||
                          Math.Abs(oldAngles[x]) - Math.Abs(finalAngles[x]) < .1))
                     {
                         oldAngles[x] = finalAngles[x];
+                        updateNAO(finalAngles[x], jointNames[x]);
+                    }*/
+
+                    if (changeAngles)
+                    {
                         updateNAO(finalAngles[x], jointNames[x]);
                     }
                 }
