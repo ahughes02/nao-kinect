@@ -36,9 +36,9 @@ namespace NAO_Kinect
                 naoMotion = new MotionProxy(ip, 9559);
 
                 // Give joints stiffness
-                naoMotion.stiffnessInterpolation("Head", 1.0f, 1.0f);
-                naoMotion.stiffnessInterpolation("LArm", 1.0f, 1.0f);
-                naoMotion.stiffnessInterpolation("RArm", 1.0f, 1.0f);
+                naoMotion.stiffnessInterpolation("Head", 0.6f, 0.6f);
+                naoMotion.stiffnessInterpolation("LArm", 0.6f, 0.6f);
+                naoMotion.stiffnessInterpolation("RArm", 0.6f, 0.6f);
             }
             catch (Exception e)
             {
