@@ -3,18 +3,20 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         Title="NAO Kinect" Height="800" Width="1200" Loaded="MainWindow_Loaded" Unloaded="MainWindow_Unloaded" WindowStartupLocation="CenterScreen" ResizeMode="CanMinimize">
     <Grid>
-        <Button x:Name="startButton" Content="Start" HorizontalAlignment="Left" Margin="176,31,0,0" VerticalAlignment="Top" Width="75" Click="startButton_Click"/>
-        <Button x:Name="stopButton" Content="Stop" HorizontalAlignment="Left" Margin="276,31,0,0" VerticalAlignment="Top" Width="75" IsEnabled="False" Click="stopButton_Click"/>
-        <Image x:Name="Image" HorizontalAlignment="Left" Height="480" Margin="10,56,0,0" VerticalAlignment="Top" Width="640"/>
-        <Label x:Name="gestureLabel" Content="Start or Stop Motion Detection" HorizontalAlignment="Left" Margin="177,6,0,0" VerticalAlignment="Top" Width="175" Height="25"/>
-        <TextBlock x:Name="debug1" HorizontalAlignment="Left" Height="421" Margin="661,31,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="523" FontSize="24"/>
-        <Label x:Name="Debug_Label" Content="Debug Output" HorizontalAlignment="Left" Height="27" Margin="655,6,0,0" VerticalAlignment="Top" Width="89"/>
-        <TextBlock x:Name="debug2" HorizontalAlignment="Left" Height="114" Margin="661,457,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="523" FontSize="24"/>
-        <TextBox x:Name="ipBox" HorizontalAlignment="Left" Height="19" Margin="10,32,0,0" TextWrapping="Wrap" Text="69.88.163.32" VerticalAlignment="Top" Width="100"/>
-        <Label Content="NAO IP:" HorizontalAlignment="Left" Margin="5,6,0,0" VerticalAlignment="Top"/>
-        <Button x:Name="calibrateButton" Content="Calibrate" HorizontalAlignment="Left" Margin="434,31,0,0" VerticalAlignment="Top" Width="75" Click="calibrateButton_Click" RenderTransformOrigin="-0.009,0.645"/>
-        <TextBlock x:Name="debug3" HorizontalAlignment="Left" Height="185" Margin="661,576,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="523" FontSize="24"/>
-        <CheckBox x:Name="invertCheck" Content="Invert Controls" HorizontalAlignment="Left" Margin="532,31,0,0" VerticalAlignment="Top" IsChecked="True" Checked="invertCheck_Checked" Unchecked="invertCheck_Unchecked"/>
+        <Button x:Name="startButton" Content="Start" HorizontalAlignment="Left" Margin="176,24,0,0" VerticalAlignment="Top" Width="85" Click="startButton_Click" Height="24" FontSize="14"/>
+        <Button x:Name="stopButton" Content="Stop" HorizontalAlignment="Left" Margin="291,24,0,0" VerticalAlignment="Top" Width="85" IsEnabled="False" Click="stopButton_Click" Height="24" FontSize="14"/>
+        <Image x:Name="Image" HorizontalAlignment="Left" Height="480" Margin="10,56,0,0" VerticalAlignment="Top" Width="640" Source="NO FEED.png"/>
+        <Label x:Name="gestureLabel" Content="Start or Stop Motion Detection" HorizontalAlignment="Left" Margin="176,-5,0,0" VerticalAlignment="Top" Width="200" Height="25" FontSize="14"/>
+        <TextBlock x:Name="debug1" HorizontalAlignment="Left" Height="480" Margin="661,56,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="523" FontSize="28"><Run Text="SAM"/><Run Text="PLE TEXT"/></TextBlock>
+        <Label x:Name="Debug_Label" Content="Current Angles:" HorizontalAlignment="Left" Height="31" Margin="661,22,0,0" VerticalAlignment="Top" Width="119" FontSize="16"/>
+        <TextBlock x:Name="debug2" HorizontalAlignment="Left" Height="174" Margin="10,576,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="639" FontSize="28" Text="SAMPLE TEXT"/>
+        <TextBox x:Name="ipBox" HorizontalAlignment="Left" Height="24" Margin="66,24,0,0" TextWrapping="Wrap" Text="69.88.163.32" VerticalAlignment="Top" Width="100" FontSize="14"/>
+        <Label Content="NAO IP:" HorizontalAlignment="Left" Margin="7,20,0,0" VerticalAlignment="Top" FontSize="14"/>
+        <Button x:Name="calibrateButton" Content="Calibrate" HorizontalAlignment="Left" Margin="428,24,0,0" VerticalAlignment="Top" Width="85" Click="calibrateButton_Click" RenderTransformOrigin="-0.009,0.645" FontSize="14" Height="24"/>
+        <TextBlock x:Name="debug3" HorizontalAlignment="Left" Height="174" Margin="661,576,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="523" FontSize="28" Text="SAMPLE TEXT"/>
+        <CheckBox x:Name="invertCheck" Content="Invert Controls" HorizontalAlignment="Left" Margin="538,0,0,723" VerticalAlignment="Bottom" IsChecked="True" Checked="invertCheck_Checked" Unchecked="invertCheck_Unchecked" FontSize="14" Height="18"/>
+        <Label x:Name="Debug_Label_2" Content="Kinect Audio:" HorizontalAlignment="Left" Height="31" Margin="10,545,0,0" VerticalAlignment="Top" Width="119" FontSize="16"/>
+        <Label x:Name="Debug_Label_3" Content="Exceptions: " HorizontalAlignment="Left" Height="31" Margin="661,545,0,0" VerticalAlignment="Top" Width="119" FontSize="16"/>
 
     </Grid>
 </Window>

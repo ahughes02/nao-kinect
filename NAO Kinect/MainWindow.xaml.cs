@@ -143,6 +143,17 @@ namespace NAO_Kinect
             calibrated = false;
         }
 
+
+        private void invertCheck_Checked(object sender, RoutedEventArgs e)
+        {
+            invert = true;
+        }
+
+        private void invertCheck_Unchecked(object sender, RoutedEventArgs e)
+        {
+            invert = false;
+        }
+
         /// ********************************************************
         /// 
         ///                     KINECT EVENTS
@@ -221,7 +232,7 @@ namespace NAO_Kinect
                     finalAngles[x] = info.angles[x] - calibrationAngles[x]; // adjustment to work with NAO robot angles
                 }
 
-                // Debug output, displays angles in radians
+                // Show angle informationin the UI
                 debug1.Text = "RShoulder Roll:\t " + info.angles[0] + "\n";
                 debug1.Text += "LShoulder Roll:\t " + info.angles[1] + "\n";
                 debug1.Text += "RElbow Roll:\t " + info.angles[2] + "\n";
@@ -234,117 +245,91 @@ namespace NAO_Kinect
                 debug1.Text += "----------------------\n";
                 debug1.Text += "RHand Status:\t " + info.RHandOpen + "\n";
                 debug1.Text += "LHand Status:\t " + info.LHandOpen + "\n";
+                debug1.Text += "\n\n";
 
-                // Check to make sure that angle has changed enough to send new angle and update angle if it has
-                debug3.Text = "";
-                for (var x = 0; x < 4; x++)
+                if (changeAngles)
                 {
-                    if (changeAngles && (Math.Abs(oldAngles[x]) - Math.Abs(finalAngles[x]) > .05 || Math.Abs(oldAngles[x]) - Math.Abs(finalAngles[x]) < .05))
+                    // Check to make sure that angle has changed enough to send new angle and update angle if it has
+                    debug3.Text = "";
+                    for (var x = 0; x < 4; x++)
                     {
-                        oldAngles[x] = finalAngles[x];
-                        if (invert)
+                        if ((Math.Abs(oldAngles[x]) - Math.Abs(finalAngles[x]) > .05 || Math.Abs(oldAngles[x]) - Math.Abs(finalAngles[x]) < .05))
                         {
-                            updateNAO(finalAngles[x], invertedJointNames[x]);
-                        }
-                        else
-                        {
-                            updateNAO(finalAngles[x], jointNames[x]);
-                        }
-
-                        debug3.Text += "I sent: " + finalAngles[x] + "\n";
-                    }
-                }
-
-                // Update right hand
-                // ReSharper disable once CompareOfFloatsByEqualityOperator
-                if (changeAngles && info.RHandOpen && rHandStatus != "open")
-                {
-                    rHandStatus = "open";
-
-                    if (invert)
-                    {
-                        if (!naoMotion.openHand("LHand"))
-                        {
-                            debug3.Text = "Exception occured when communicating with NAO check C:\\NAO Motion\\ for details";
-                            rHandStatus = "unknown";
+                            oldAngles[x] = finalAngles[x];
+                            if (invert)
+                            {
+                                updateNAO(finalAngles[x], invertedJointNames[x]);
+                                debug1.Text += "I sent: " + finalAngles[x] + " to:" + invertedJointNames[x];
+                            }
+                            else
+                            {
+                                updateNAO(finalAngles[x], jointNames[x]);
+                                debug1.Text += "I sent: " + finalAngles[x] + " to:" + jointNames[x];
+                            }
                         }
                     }
-                    else
-                    {
-                        if (!naoMotion.openHand("RHand"))
-                        {
-                            debug3.Text = "Exception occured when communicating with NAO check C:\\NAO Motion\\ for details";
-                            rHandStatus = "unknown";
-                        }
-                    }
-                }
 
-                // ReSharper disable once CompareOfFloatsByEqualityOperator
-                if (changeAngles && !info.RHandOpen && rHandStatus != "closed")
-                {
-                    rHandStatus = "closed";
-
-                    if (invert)
+                    // update left and right hands
+                    switch (info.RHandOpen)
                     {
-                        if (!naoMotion.closeHand("LHand"))
-                        {
-                            debug3.Text = "Exception occured when communicating with NAO check C:\\NAO Motion\\ for details";
-                            rHandStatus = "unknown";
-                        }
+                        case true:
+                            if (lHandStatus == "open")
+                            {
+                                break;
+                            }
+                            lHandStatus = "open";
+                            if(invert)
+                            {
+                                naoMotion.openHand("LHand");
+                                break;
+                            }
+                            naoMotion.openHand("RHand");
+                            break;
+                        case false:
+                            if (lHandStatus == "closed")
+                            {
+                                break;
+                            }
+                            lHandStatus = "closed";
+                            if(invert)
+                            {
+                                naoMotion.closeHand("LHand");
+                            
+                                break;
+                            }
+                            naoMotion.closeHand("RHand");
+                            break;
                     }
-                    else
-                    {
-                        if (!naoMotion.closeHand("RHand"))
-                        {
-                            debug3.Text = "Exception occured when communicating with NAO check C:\\NAO Motion\\ for details";
-                            rHandStatus = "unknown";
-                        }
-                    }
-                }
 
-                // Update left hand
-                // ReSharper disable once CompareOfFloatsByEqualityOperator
-                if (changeAngles && info.LHandOpen && lHandStatus != "open")
-                {
-                    lHandStatus = "open";
-
-                    if (invert)
+                    switch (info.LHandOpen)
                     {
-                        if (!naoMotion.openHand("RHand"))
-                        {
-                            debug3.Text = "Exception occured when communicating with NAO check C:\\NAO Motion\\ for details";
-                            rHandStatus = "unknown";
-                        }
-                    }
-                    else
-                    {
-                        if (!naoMotion.openHand("LHand"))
-                        {
-                            debug3.Text = "Exception occured when communicating with NAO check C:\\NAO Motion\\ for details";
-                            rHandStatus = "unknown";
-                        }
-                    }
-                }
-
-                if (changeAngles && !info.LHandOpen && lHandStatus != "closed")
-                {
-                    lHandStatus = "closed";
-
-                    if (invert)
-                    {
-                        if (!naoMotion.closeHand("RHand"))
-                        {
-                            debug3.Text = "Exception occured when communicating with NAO check C:\\NAO Motion\\ for details";
-                            rHandStatus = "unknown";
-                        }
-                    }
-                    else
-                    {
-                        if (!naoMotion.closeHand("LHand"))
-                        {
-                            debug3.Text = "Exception occured when communicating with NAO check C:\\NAO Motion\\ for details";
-                            rHandStatus = "unknown";
-                        }
+                        case true:
+                            if (lHandStatus == "open")
+                            {
+                                break;
+                            }
+                            lHandStatus = "open";
+                            if(invert)
+                            {
+                                naoMotion.openHand("RHand");
+                                break;
+                            }
+                            naoMotion.openHand("LHand");
+                            break;
+                        case false:
+                            if (lHandStatus == "closed")
+                            {
+                                break;
+                            }
+                            lHandStatus = "closed";
+                            if(invert)
+                            {
+                                naoMotion.closeHand("RHand");
+                            
+                                break;
+                            }
+                            naoMotion.closeHand("LHand");
+                            break;
                     }
                 }
             }
@@ -362,73 +347,15 @@ namespace NAO_Kinect
 
         private void updateNAO(float angle, string joint)
         {
-            if (joint == "RShoulderRoll")
+            if (joint == "RShoulderRoll" || joint == "RElbowRoll")
             {
-                angle = 0 - angle;
+                angle = (0 - angle);
 
                 if (!naoMotion.moveJoint(angle, joint))
                 {
                     debug3.Text = "Exception occured when communicating with NAO check C:\\NAO Motion\\ for details";
                 }
             }
-
-            if (joint == "LRshoulderRoll")
-            {
-                if (!naoMotion.moveJoint(angle, joint))
-                {
-                    debug3.Text = "Exception occured when communicating with NAO check C:\\NAO Motion\\ for details";
-                }
-            }
-
-            if (joint == "RElbowRoll" || joint == "LElbowRoll")
-            {
-                if (angle < -1.5)
-                {
-                    try
-                    {
-                        if (!naoMotion.moveJoint(-1.5f, joint))
-                        {
-                            debug3.Text = "Exception occured when communicating with NAO check C:\\NAO Motion\\ for details";
-                        }
-                    }
-                    catch (Exception)
-                    { }
-                }
-                else if (angle > -.03)
-                {
-                    try
-                    {
-                        if (!naoMotion.moveJoint(-.03f, joint))
-                        {
-                            debug3.Text = "Exception occured when communicating with NAO check C:\\NAO Motion\\ for details";
-                        }
-                    }
-                    catch (Exception)
-                    { }
-                }
-                else
-                {
-                    try
-                    {
-                        if (!naoMotion.moveJoint(angle, joint))
-                        {
-                            debug3.Text = "Exception occured when communicating with NAO check C:\\NAO Motion\\ for details";
-                        }
-                    }
-                    catch (Exception)
-                    { }
-                }
-            }
-        }
-
-        private void invertCheck_Checked(object sender, RoutedEventArgs e)
-        {
-            invert = true;
-        }
-
-        private void invertCheck_Unchecked(object sender, RoutedEventArgs e)
-        {
-            invert = false;
         }
     }
 }
