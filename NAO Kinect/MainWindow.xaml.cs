@@ -273,7 +273,7 @@ namespace NAO_Kinect
                     switch (info.RHandOpen)
                     {
                         case true:
-                            if (lHandStatus == "open")
+                            if (rHandStatus == "open")
                             {
                                 break;
                             }
@@ -286,7 +286,7 @@ namespace NAO_Kinect
                             naoMotion.openHand("RHand");
                             break;
                         case false:
-                            if (lHandStatus == "closed")
+                            if (rHandStatus == "closed")
                             {
                                 break;
                             }
