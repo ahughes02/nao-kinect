@@ -31,8 +31,10 @@ namespace NAO_Kinect
         /// </summary>
         private bool calibrated;
         private bool changeAngles;
+        private bool invert;
         private string rHandStatus = "unknown";
         private string lHandStatus = "unkown";
+        private readonly string[] invertedJointNames = { "LShoulderRoll", "RShoulderRoll", "LElbowRoll", "RElbowRoll" };
         private readonly string[] jointNames = {"RShoulderRoll", "LShoulderRoll", "RElbowRoll", "LElbowRoll"};
         private float[] calibrationAngles = new float[6];
         private float[] oldAngles = new float[6];
@@ -54,6 +56,8 @@ namespace NAO_Kinect
         public MainWindow()
         {
             InitializeComponent();
+
+            invert = true;
 
             // Call the motion constructor
             naoMotion = new Motion();
@@ -232,12 +236,22 @@ namespace NAO_Kinect
                 debug1.Text += "LHand Status:\t " + info.LHandOpen + "\n";
 
                 // Check to make sure that angle has changed enough to send new angle and update angle if it has
+                debug3.Text = "";
                 for (var x = 0; x < 4; x++)
                 {
-                    if (changeAngles && (Math.Abs(oldAngles[x]) - Math.Abs(finalAngles[x]) > .03 || Math.Abs(oldAngles[x]) - Math.Abs(finalAngles[x]) < .03))
+                    if (changeAngles && (Math.Abs(oldAngles[x]) - Math.Abs(finalAngles[x]) > .05 || Math.Abs(oldAngles[x]) - Math.Abs(finalAngles[x]) < .05))
                     {
                         oldAngles[x] = finalAngles[x];
-                        updateNAO(finalAngles[x], jointNames[x]);
+                        if (invert)
+                        {
+                            updateNAO(finalAngles[x], invertedJointNames[x]);
+                        }
+                        else
+                        {
+                            updateNAO(finalAngles[x], jointNames[x]);
+                        }
+
+                        debug3.Text += "I sent: " + finalAngles[x] + "\n";
                     }
                 }
 
@@ -247,10 +261,21 @@ namespace NAO_Kinect
                 {
                     rHandStatus = "open";
 
-                    if (!naoMotion.openHand("RHand"))
+                    if (invert)
                     {
-                        debug3.Text = "Exception occured when communicating with NAO check C:\\NAO Motion\\ for details";
-                        rHandStatus = "unknown";
+                        if (!naoMotion.openHand("LHand"))
+                        {
+                            debug3.Text = "Exception occured when communicating with NAO check C:\\NAO Motion\\ for details";
+                            rHandStatus = "unknown";
+                        }
+                    }
+                    else
+                    {
+                        if (!naoMotion.openHand("RHand"))
+                        {
+                            debug3.Text = "Exception occured when communicating with NAO check C:\\NAO Motion\\ for details";
+                            rHandStatus = "unknown";
+                        }
                     }
                 }
 
@@ -259,10 +284,21 @@ namespace NAO_Kinect
                 {
                     rHandStatus = "closed";
 
-                    if (!naoMotion.closeHand("RHand"))
+                    if (invert)
                     {
-                        debug3.Text = "Exception occured when communicating with NAO check C:\\NAO Motion\\ for details";
-                        rHandStatus = "unknown";
+                        if (!naoMotion.closeHand("LHand"))
+                        {
+                            debug3.Text = "Exception occured when communicating with NAO check C:\\NAO Motion\\ for details";
+                            rHandStatus = "unknown";
+                        }
+                    }
+                    else
+                    {
+                        if (!naoMotion.closeHand("RHand"))
+                        {
+                            debug3.Text = "Exception occured when communicating with NAO check C:\\NAO Motion\\ for details";
+                            rHandStatus = "unknown";
+                        }
                     }
                 }
 
@@ -272,10 +308,21 @@ namespace NAO_Kinect
                 {
                     lHandStatus = "open";
 
-                    if (!naoMotion.openHand("LHand"))
+                    if (invert)
                     {
-                        debug3.Text = "Exception occured when communicating with NAO check C:\\NAO Motion\\ for details";
-                        lHandStatus = "unknown";
+                        if (!naoMotion.openHand("RHand"))
+                        {
+                            debug3.Text = "Exception occured when communicating with NAO check C:\\NAO Motion\\ for details";
+                            rHandStatus = "unknown";
+                        }
+                    }
+                    else
+                    {
+                        if (!naoMotion.openHand("LHand"))
+                        {
+                            debug3.Text = "Exception occured when communicating with NAO check C:\\NAO Motion\\ for details";
+                            rHandStatus = "unknown";
+                        }
                     }
                 }
 
@@ -283,10 +330,21 @@ namespace NAO_Kinect
                 {
                     lHandStatus = "closed";
 
-                    if (!naoMotion.closeHand("LHand"))
+                    if (invert)
                     {
-                        debug3.Text = "Exception occured when communicating with NAO check C:\\NAO Motion\\ for details";
-                        lHandStatus = "unknown";
+                        if (!naoMotion.closeHand("RHand"))
+                        {
+                            debug3.Text = "Exception occured when communicating with NAO check C:\\NAO Motion\\ for details";
+                            rHandStatus = "unknown";
+                        }
+                    }
+                    else
+                    {
+                        if (!naoMotion.closeHand("LHand"))
+                        {
+                            debug3.Text = "Exception occured when communicating with NAO check C:\\NAO Motion\\ for details";
+                            rHandStatus = "unknown";
+                        }
                     }
                 }
             }
@@ -304,44 +362,14 @@ namespace NAO_Kinect
 
         private void updateNAO(float angle, string joint)
         {
-            if (joint == "RShoulderRoll" || joint == "LShoulderRoll")
+            if (joint == "RShoulderRoll")
             {
-                if (angle > 1.3)
-                {
-                    try
-                    {
-                        if (!naoMotion.moveJoint(1.3f, joint))
-                        {
-                            debug3.Text = "Exception occured when communicating with NAO check C:\\NAO Motion\\ for details";
-                        }
-                    }
-                    catch (Exception)
-                    { }
-                }
-                else if (angle < -.3)
-                {
-                    try
-                    {
-                        if (!naoMotion.moveJoint(-.3f, joint))
-                        {
-                            debug3.Text = "Exception occured when communicating with NAO check C:\\NAO Motion\\ for details";
-                        }
-                    }
-                    catch (Exception)
-                    { }
-                }
-                else
-                {
-                    try
-                    {
-                        if (!naoMotion.moveJoint(angle, joint))
-                        {
-                            debug3.Text = "Exception occured when communicating with NAO check C:\\NAO Motion\\ for details";
-                        }
-                    }
-                    catch (Exception)
-                    { }
-                }
+                angleUpdate((0 - angle), joint);
+            }
+
+            if (joint == "LRshoulderRoll")
+            {
+                angleUpdate(angle, joint);
             }
 
             if (joint == "RElbowRoll" || joint == "LElbowRoll")
@@ -383,6 +411,56 @@ namespace NAO_Kinect
                     { }
                 }
             }
+        }
+
+        private void angleUpdate(float angle, string joint)
+        {
+                if (angle > 1.3)
+                {
+                    try
+                    {
+                        if (!naoMotion.moveJoint(1.3f, joint))
+                        {
+                            debug3.Text = "Exception occured when communicating with NAO check C:\\NAO Motion\\ for details";
+                        }
+                    }
+                    catch (Exception)
+                    { }
+                }
+                else if (angle < -.3)
+                {
+                    try
+                    {
+                        if (!naoMotion.moveJoint(-.3f, joint))
+                        {
+                            debug3.Text = "Exception occured when communicating with NAO check C:\\NAO Motion\\ for details";
+                        }
+                    }
+                    catch (Exception)
+                    { }
+                }
+                else
+                {
+                    try
+                    {
+                        if (!naoMotion.moveJoint(angle, joint))
+                        {
+                            debug3.Text = "Exception occured when communicating with NAO check C:\\NAO Motion\\ for details";
+                        }
+                    }
+                    catch (Exception)
+                    { }
+                }
+        }
+
+        private void invertCheck_Checked(object sender, RoutedEventArgs e)
+        {
+            invert = true;
+        }
+
+        private void invertCheck_Unchecked(object sender, RoutedEventArgs e)
+        {
+            invert = false;
         }
     }
 }
