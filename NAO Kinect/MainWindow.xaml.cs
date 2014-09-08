@@ -364,12 +364,20 @@ namespace NAO_Kinect
         {
             if (joint == "RShoulderRoll")
             {
-                angleUpdate((0 - angle), joint);
+                angle = 0 - angle;
+
+                if (!naoMotion.moveJoint(angle, joint))
+                {
+                    debug3.Text = "Exception occured when communicating with NAO check C:\\NAO Motion\\ for details";
+                }
             }
 
             if (joint == "LRshoulderRoll")
             {
-                angleUpdate(angle, joint);
+                if (!naoMotion.moveJoint(angle, joint))
+                {
+                    debug3.Text = "Exception occured when communicating with NAO check C:\\NAO Motion\\ for details";
+                }
             }
 
             if (joint == "RElbowRoll" || joint == "LElbowRoll")
@@ -411,46 +419,6 @@ namespace NAO_Kinect
                     { }
                 }
             }
-        }
-
-        private void angleUpdate(float angle, string joint)
-        {
-                if (angle > 1.3)
-                {
-                    try
-                    {
-                        if (!naoMotion.moveJoint(1.3f, joint))
-                        {
-                            debug3.Text = "Exception occured when communicating with NAO check C:\\NAO Motion\\ for details";
-                        }
-                    }
-                    catch (Exception)
-                    { }
-                }
-                else if (angle < -.3)
-                {
-                    try
-                    {
-                        if (!naoMotion.moveJoint(-.3f, joint))
-                        {
-                            debug3.Text = "Exception occured when communicating with NAO check C:\\NAO Motion\\ for details";
-                        }
-                    }
-                    catch (Exception)
-                    { }
-                }
-                else
-                {
-                    try
-                    {
-                        if (!naoMotion.moveJoint(angle, joint))
-                        {
-                            debug3.Text = "Exception occured when communicating with NAO check C:\\NAO Motion\\ for details";
-                        }
-                    }
-                    catch (Exception)
-                    { }
-                }
         }
 
         private void invertCheck_Checked(object sender, RoutedEventArgs e)
