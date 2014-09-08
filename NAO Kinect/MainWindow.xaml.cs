@@ -277,7 +277,7 @@ namespace NAO_Kinect
                             {
                                 break;
                             }
-                            lHandStatus = "open";
+                            rHandStatus = "open";
                             if(invert)
                             {
                                 naoMotion.openHand("LHand");
@@ -290,7 +290,7 @@ namespace NAO_Kinect
                             {
                                 break;
                             }
-                            lHandStatus = "closed";
+                            rHandStatus = "closed";
                             if(invert)
                             {
                                 naoMotion.closeHand("LHand");
