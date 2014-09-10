@@ -1,5 +1,5 @@
 ﻿/*
- * This software was developed by Austin Hughes
+ * This file was created by Austin Hughes and Stetson Gafford
  * Last Modified: 2014-09-04
  */
 

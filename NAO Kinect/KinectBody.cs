@@ -1,6 +1,6 @@
 ﻿/*
- * This software was developed by Austin Hughes
- * Last Modified: 2014-09-04
+ * This file was created by Austin Hughes and Stetson Gafford
+ * Last Modified: 2014-09-04 
  */
 
 // System imports

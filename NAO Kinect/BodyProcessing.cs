@@ -1,16 +1,16 @@
 ﻿/*
- * This software was developed by Austin Hughes
- * Last Modified: 2014-09-04
+ * This file was created by Austin Hughes and Stetson Gafford
+ * Last Modified: 2014-09-10
  */
 
 // System imports
 using System;
+using System.Windows.Media.Media3D; // For 3D vectors
 
 // Microsoft imports
 using Microsoft.Kinect;
 
-// For 3D vectors
-using System.Windows.Media.Media3D;
+
 
 namespace NAO_Kinect
 {
@@ -46,13 +46,13 @@ namespace NAO_Kinect
             kinectInterface = interfaceClass;
 
             bodyInfo = new BodyInfo();
-            bodyInfo.angles = new float[4];
+            bodyInfo.angles = new float[6];
         }
 
         /// <summary>
         /// Gets the usable angles of joints for sending to NAO
         /// </summary>
-        /// <returns> Array of useful info </returns>
+        /// <returns> struct of tupe BodyInfo </returns>
         public BodyInfo getInfo()
         {
             trackedBody = kinectInterface.getBody();
@@ -107,15 +107,16 @@ namespace NAO_Kinect
                 // Stores the left shoulder roll in radians
                 bodyInfo.angles[1] = angleCalcXY(hipLeft, shoulderLeft, elbowLeft);
 
-                // Shoulder pitch should be same as above but with angleCalcYZ
-
-                // Stores the left elbow roll in radians
-                bodyInfo.angles[2] = angleCalc3D(shoulderLeft, elbowLeft, wristLeft);
                 // Stores the right elbow roll in radians
-                bodyInfo.angles[3] = angleCalc3D(shoulderRight, elbowRight, wristRight);
+                bodyInfo.angles[2] = angleCalc3D(shoulderRight, elbowRight, wristRight);
+                // Stores the left elbow roll in radians
+                bodyInfo.angles[3] = angleCalc3D(shoulderLeft, elbowLeft, wristLeft);
 
-
-                    
+                // Shoulder pitch should be same as shoulder roll but with angleCalcYZ
+                // Stores the right shoulder pitch in radians
+                bodyInfo.angles[4] = angleCalcYZ(hipRight, shoulderRight, elbowRight);
+                // Stores the left shoulder pitch in radians
+                bodyInfo.angles[5] = angleCalcYZ(hipLeft, shoulderLeft, elbowLeft);
             }
             else
             {

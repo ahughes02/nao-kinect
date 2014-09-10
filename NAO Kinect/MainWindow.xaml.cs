@@ -1,6 +1,6 @@
 ﻿/*
- * This software was developed by Austin Hughes
- * Last Modified: 2014-09-04
+ * This file was created by Austin Hughes and Stetson Gafford
+ * Last Modified: 2014-09-10
  */
 
 // System Imports
@@ -29,13 +29,13 @@ namespace NAO_Kinect
         /// <summary>
         /// Variables
         /// </summary>
-        private bool calibrated;
-        private bool changeAngles;
-        private bool invert;
+        private bool calibrated = false;
+        private bool allowNaoUpdates = false;
+        private bool invert = true;
         private string rHandStatus = "unknown";
         private string lHandStatus = "unkown";
-        private readonly string[] invertedJointNames = { "RShoulderRoll", "LShoulderRoll", "LElbowRoll", "RElbowRoll" };
-        private readonly string[] jointNames = {"LShoulderRoll", "RShoulderRoll", "RElbowRoll", "LElbowRoll"};
+        private readonly string[] invertedJointNames = {"LShoulderRoll", "RShoulderRoll", "LElbowRoll", "RElbowRoll"};
+        private readonly string[] jointNames = { "RShoulderRoll", "LShoulderRoll", "RElbowRoll", "LElbowRoll" };
         private float[] calibrationAngles = new float[6];
         private float[] oldAngles = new float[6];
         private float[] finalAngles = new float[4];
@@ -57,8 +57,6 @@ namespace NAO_Kinect
         {
             InitializeComponent();
 
-            invert = true;
-
             // Call the motion constructor
             naoMotion = new Motion();
         }
@@ -76,6 +74,10 @@ namespace NAO_Kinect
         /// <param name="e"> Any additional arguments </param>
         private void MainWindow_Loaded(object sender, RoutedEventArgs e)
         {
+            debug1.Text = "";
+            debug2.Text = "";
+            debug3.Text = "";
+
             // Creates the kinectInterface class and registers event handlers
             kinectInterface = new KinectInterface();
             kinectInterface.start();
@@ -90,7 +92,7 @@ namespace NAO_Kinect
             bodyProcessing = new BodyProcessing(kinectInterface);
 
             // Create a timer for event based NAO update. 
-            motionTimer.Interval = new TimeSpan(0, 0, 0, 0, (int)Math.Ceiling(1000.0 / 5));
+            motionTimer.Interval = new TimeSpan(0, 0, 0, 0, (int)Math.Ceiling(1000.0 / 7));
             motionTimer.Start();
 
             motionTimer.Tick += motionTimer_Tick;
@@ -106,7 +108,7 @@ namespace NAO_Kinect
             if (kinectInterface != null)
             {
                 kinectInterface.end();
-                kinectThread.Abort();
+                //kinectThread.Abort();
             }
         }
 
@@ -119,7 +121,7 @@ namespace NAO_Kinect
         {
             naoMotion.connect(ipBox.Text);
 
-            changeAngles = true;
+            allowNaoUpdates = true;
 
             stopButton.IsEnabled = true;
             startButton.IsEnabled = false;
@@ -132,23 +134,37 @@ namespace NAO_Kinect
         /// <param name="e"> Any additional arguments </param>
         private void stopButton_Click(object sender, RoutedEventArgs e)
         {
-            changeAngles = false;
+            allowNaoUpdates = false;
 
             stopButton.IsEnabled = false;
             startButton.IsEnabled = true;
         }
 
+        /// <summary>
+        /// Event handler for calibrate button click
+        /// </summary>
+        /// <param name="sender"> Object that generated the event </param>
+        /// <param name="e"> Any additional arguments </param>
         private void calibrateButton_Click(object sender, RoutedEventArgs e)
         {
             calibrated = false;
         }
 
-
+        /// <summary>
+        /// Event handler for invert check box being checked
+        /// </summary>
+        /// <param name="sender"> Object that generated the event </param>
+        /// <param name="e"> Any additional arguments </param>
         private void invertCheck_Checked(object sender, RoutedEventArgs e)
         {
             invert = true;
         }
 
+        /// <summary>
+        /// Event handler for invert check box being unchecked
+        /// </summary>
+        /// <param name="sender"> Object that generated the event </param>
+        /// <param name="e"> Any additional arguments </param>
         private void invertCheck_Unchecked(object sender, RoutedEventArgs e)
         {
             invert = false;
@@ -209,6 +225,11 @@ namespace NAO_Kinect
             }
         }
 
+        /// <summary>
+        /// Timer to rate limit NAO joint updates
+        /// </summary>
+        /// <param name="sender"> Object that generated the event </param>
+        /// <param name="e"> Any additional arguments </param>
         private void motionTimer_Tick(object sender, EventArgs e)
         {
             // Gets array of info from bodyProcessing
@@ -219,7 +240,7 @@ namespace NAO_Kinect
                 // Checks for calibration flag and then updates calibration if it is set to true
                 if (calibrated == false)
                 {
-                    for (var x = 0; x < 4; x++)
+                    for (var x = 0; x < 6; x++)
                     {
                         calibrationAngles[x] = info.angles[x];
                     }
@@ -227,7 +248,7 @@ namespace NAO_Kinect
                 }
 
                 // Generate calibrated angles
-                for (var x = 0; x < 4; x++)
+                for (var x = 0; x < 6; x++)
                 {
                     finalAngles[x] = info.angles[x] - calibrationAngles[x]; // adjustment to work with NAO robot angles
                 }
@@ -237,39 +258,40 @@ namespace NAO_Kinect
                 debug1.Text += "LShoulder Roll:\t " + info.angles[1] + "\n";
                 debug1.Text += "RElbow Roll:\t " + info.angles[2] + "\n";
                 debug1.Text += "LElbow Roll:\t " + info.angles[3] + "\n";
+                debug1.Text += "RShoulder Pitch:\t " + info.angles[4] + "\n";
+                debug1.Text += "LShoulder Pitch:\t " + info.angles[5] + "\n";
                 debug1.Text += "----------------------\n";
                 debug1.Text += "Calibrated RSR:\t " + finalAngles[0] + "\n";
                 debug1.Text += "Calibrated LSR:\t " + finalAngles[1] + "\n";
                 debug1.Text += "Calibrated RER:\t " + finalAngles[2] + "\n";
                 debug1.Text += "Calibrated LER:\t " + finalAngles[3] + "\n";
+                debug1.Text += "Calibrated RSP:\t " + finalAngles[4] + "\n";
+                debug1.Text += "Calibrated LSP:\t " + finalAngles[5] + "\n";
                 debug1.Text += "----------------------\n";
                 debug1.Text += "RHand Status:\t " + info.RHandOpen + "\n";
                 debug1.Text += "LHand Status:\t " + info.LHandOpen + "\n";
-                debug1.Text += "\n\n";
 
-                if (changeAngles)
+                // Check if updates should be sent to NAO
+                if (allowNaoUpdates)
                 {
                     // Check to make sure that angle has changed enough to send new angle and update angle if it has
-                    debug3.Text = "";
                     for (var x = 0; x < 4; x++)
                     {
-                        if ((Math.Abs(oldAngles[x]) - Math.Abs(finalAngles[x]) > .05 || Math.Abs(oldAngles[x]) - Math.Abs(finalAngles[x]) < .05))
+                        if ((Math.Abs(oldAngles[x]) - Math.Abs(info.angles[x]) > .05 || Math.Abs(oldAngles[x]) - Math.Abs(info.angles[x]) < .05))
                         {
-                            oldAngles[x] = finalAngles[x];
+                            oldAngles[x] = info.angles[x];
                             if (invert)
                             {
-                                updateNAO(finalAngles[x], invertedJointNames[x]);
-                                //debug3.Text += "I sent: " + finalAngles[x] + " to:" + invertedJointNames[x];
+                                updateNAO(info.angles[x], invertedJointNames[x]);
                             }
                             else
                             {
-                                updateNAO(finalAngles[x], jointNames[x]);
-                                //debug3.Text += "I sent: " + finalAngles[x] + " to:" + jointNames[x];
+                                updateNAO(info.angles[x], jointNames[x]);
                             }
                         }
                     }
 
-                    // update left and right hands
+                    // update right hand
                     switch (info.RHandOpen)
                     {
                         case true:
@@ -301,6 +323,7 @@ namespace NAO_Kinect
                             break;
                     }
 
+                    // update left hand
                     switch (info.LHandOpen)
                     {
                         case true:
@@ -347,17 +370,21 @@ namespace NAO_Kinect
 
         private void updateNAO(float angle, string joint)
         {
+            // RShoulderRoll and RElbowRoll require inverted angles
             if (joint == "RShoulderRoll" || joint == "RElbowRoll")
             {
+                // Invert the angle
                 angle = (0 - angle);
 
+                // Check for error when moving joint
                 if (!naoMotion.moveJoint(angle, joint))
                 {
                     debug3.Text = "Exception occured when communicating with NAO check C:\\NAO Motion\\ for details";
                 }
             }
-            else
+            else // else just move the joint
             {
+                // Check for error when moving joint
                 if (!naoMotion.moveJoint(angle, joint))
                 {
                     debug3.Text = "Exception occured when communicating with NAO check C:\\NAO Motion\\ for details";
