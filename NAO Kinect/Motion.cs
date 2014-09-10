@@ -142,7 +142,7 @@ namespace NAO_Kinect
         {
             try
             {
-                naoMotion.setAngles(joint, value, 0.2f);
+                naoMotion.setAngles(joint, value, 0.3f);
                 return true;
             }
             catch (Exception e)

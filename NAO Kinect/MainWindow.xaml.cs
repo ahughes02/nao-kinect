@@ -34,8 +34,8 @@ namespace NAO_Kinect
         private bool invert;
         private string rHandStatus = "unknown";
         private string lHandStatus = "unkown";
-        private readonly string[] invertedJointNames = { "LShoulderRoll", "RShoulderRoll", "LElbowRoll", "RElbowRoll" };
-        private readonly string[] jointNames = {"RShoulderRoll", "LShoulderRoll", "RElbowRoll", "LElbowRoll"};
+        private readonly string[] invertedJointNames = { "RShoulderRoll", "LShoulderRoll", "LElbowRoll", "RElbowRoll" };
+        private readonly string[] jointNames = {"LShoulderRoll", "RShoulderRoll", "RElbowRoll", "LElbowRoll"};
         private float[] calibrationAngles = new float[6];
         private float[] oldAngles = new float[6];
         private float[] finalAngles = new float[4];
@@ -90,7 +90,7 @@ namespace NAO_Kinect
             bodyProcessing = new BodyProcessing(kinectInterface);
 
             // Create a timer for event based NAO update. 
-            motionTimer.Interval = new TimeSpan(0, 0, 0, 0, (int)Math.Ceiling(1000.0 / 3));
+            motionTimer.Interval = new TimeSpan(0, 0, 0, 0, (int)Math.Ceiling(1000.0 / 5));
             motionTimer.Start();
 
             motionTimer.Tick += motionTimer_Tick;
@@ -259,12 +259,12 @@ namespace NAO_Kinect
                             if (invert)
                             {
                                 updateNAO(finalAngles[x], invertedJointNames[x]);
-                                debug1.Text += "I sent: " + finalAngles[x] + " to:" + invertedJointNames[x];
+                                //debug3.Text += "I sent: " + finalAngles[x] + " to:" + invertedJointNames[x];
                             }
                             else
                             {
                                 updateNAO(finalAngles[x], jointNames[x]);
-                                debug1.Text += "I sent: " + finalAngles[x] + " to:" + jointNames[x];
+                                //debug3.Text += "I sent: " + finalAngles[x] + " to:" + jointNames[x];
                             }
                         }
                     }
@@ -351,6 +351,13 @@ namespace NAO_Kinect
             {
                 angle = (0 - angle);
 
+                if (!naoMotion.moveJoint(angle, joint))
+                {
+                    debug3.Text = "Exception occured when communicating with NAO check C:\\NAO Motion\\ for details";
+                }
+            }
+            else
+            {
                 if (!naoMotion.moveJoint(angle, joint))
                 {
                     debug3.Text = "Exception occured when communicating with NAO check C:\\NAO Motion\\ for details";
