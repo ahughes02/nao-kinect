@@ -163,7 +163,7 @@ namespace NAO_Kinect
             return (float)(Math.PI / 180) * angle; // radians
         }
 
-        // Calculates angle between a<-b and b->c for situation a->b->c on XZ plane only
+        // Calculates angle between a<-b and b->c for situation a->b->c on YZ plane only
         private static float angleCalcYZ(CameraSpacePoint a, CameraSpacePoint b, CameraSpacePoint c)
         {
             Vector3D ba = new Vector3D(0, a.Y - b.Y, a.Z - b.Z);
