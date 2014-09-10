@@ -9,6 +9,9 @@ using System;
 // Microsoft imports
 using Microsoft.Kinect;
 
+// For 3D vectors
+using System.Windows.Media.Media3D;
+
 namespace NAO_Kinect
 {
     /// <summary>
@@ -58,22 +61,20 @@ namespace NAO_Kinect
             {
                 bodyInfo.noTrackedBody = false;
 
-                var wlY = trackedBody.Joints[JointType.WristLeft].Position.Y;
-                var wlX = trackedBody.Joints[JointType.WristLeft].Position.X;
-                var wrY = trackedBody.Joints[JointType.WristRight].Position.Y;
-                var wrX = trackedBody.Joints[JointType.WristRight].Position.X;
+                var wristLeft = trackedBody.Joints[JointType.WristLeft].Position;
+                var wristRight = trackedBody.Joints[JointType.WristRight].Position;
 
-                var scX = trackedBody.Joints[JointType.SpineShoulder].Position.X;
-                var scY = trackedBody.Joints[JointType.SpineShoulder].Position.Y;
+                var spineShoulder = trackedBody.Joints[JointType.SpineShoulder].Position;
+                var spineBase = trackedBody.Joints[JointType.SpineBase].Position;
 
-                var elX = trackedBody.Joints[JointType.ElbowLeft].Position.X;
-                var elY = trackedBody.Joints[JointType.ElbowLeft].Position.Y;
+                var elbowLeft = trackedBody.Joints[JointType.ElbowLeft].Position;
+                var elbowRight = trackedBody.Joints[JointType.ElbowRight].Position;
 
-                var erX = trackedBody.Joints[JointType.ElbowRight].Position.X;
-                var erY = trackedBody.Joints[JointType.ElbowRight].Position.Y;
+                var shoulderLeft = trackedBody.Joints[JointType.ShoulderLeft].Position;
+                var shoulderRight = trackedBody.Joints[JointType.ShoulderRight].Position;
 
-                var spX = trackedBody.Joints[JointType.SpineBase].Position.X;
-                var spY = trackedBody.Joints[JointType.SpineBase].Position.Y;
+                var hipLeft = trackedBody.Joints[JointType.HipLeft].Position;
+                var hipRight = trackedBody.Joints[JointType.HipRight].Position;
 
                 switch (trackedBody.HandRightState)
                 {
@@ -102,13 +103,19 @@ namespace NAO_Kinect
                 }
 
                 // Stores the right shoulder roll in radians
-                bodyInfo.angles[0] = angleCalc(scX, scY, spX, spY, erX, erY);
-                // Stores the lef shoulder roll in radians
-                bodyInfo.angles[1] = angleCalc(scX, scY, spX, spY, elX, elY);
-                // Stores the right elbow roll in radians
-                bodyInfo.angles[2] = angleCalc(elX, elY, wlX, wlY, scX, scY);
+                bodyInfo.angles[0] = angleCalcXY(hipRight, shoulderRight, elbowRight);
+                // Stores the left shoulder roll in radians
+                bodyInfo.angles[1] = angleCalcXY(hipLeft, shoulderLeft, elbowLeft);
+
+                // Shoulder pitch should be same as above but with angleCalcYZ
+
                 // Stores the left elbow roll in radians
-                bodyInfo.angles[3] = angleCalc(erX, erY, wrX, wrY, scX, scY);
+                bodyInfo.angles[2] = angleCalc3D(shoulderLeft, elbowLeft, wristLeft);
+                // Stores the right elbow roll in radians
+                bodyInfo.angles[3] = angleCalc3D(shoulderRight, elbowRight, wristRight);
+
+
+                    
             }
             else
             {
@@ -134,6 +141,36 @@ namespace NAO_Kinect
             var p23 = (float)Math.Sqrt(((p2X - p3X) * (p2X - p3X)) + ((p2Y - p3Y) * (p2Y - p3Y)));
 
             return (float)Math.Acos(((p12 * p12) + (p13 * p13) - (p23 * p23)) / (2 * p12 * p13));
+        }
+
+        // Calculates angle between a<-b and b->c for situation a->b->c
+        private static float angleCalc3D(CameraSpacePoint a, CameraSpacePoint b, CameraSpacePoint c)
+        {
+            Vector3D ba = new Vector3D(a.X - b.X, a.Y - b.Y, a.Z - b.Z);
+            Vector3D bc = new Vector3D(c.X - b.X, c.Y - b.Y, c.Z - b.Z);
+
+            float angle = (float)Vector3D.AngleBetween(ba, bc); // degrees
+            return (float)(Math.PI / 180) * angle; // radians
+        }
+
+        // Calculates angle between a<-b and b->c for situation a->b->c on XY plane only
+        private static float angleCalcXY(CameraSpacePoint a, CameraSpacePoint b, CameraSpacePoint c)
+        {
+            Vector3D ba = new Vector3D(a.X - b.X, a.Y - b.Y, 0);
+            Vector3D bc = new Vector3D(c.X - b.X, c.Y - b.Y, 0);
+
+            float angle = (float)Vector3D.AngleBetween(ba, bc); // degrees
+            return (float)(Math.PI / 180) * angle; // radians
+        }
+
+        // Calculates angle between a<-b and b->c for situation a->b->c on XZ plane only
+        private static float angleCalcYZ(CameraSpacePoint a, CameraSpacePoint b, CameraSpacePoint c)
+        {
+            Vector3D ba = new Vector3D(0, a.Y - b.Y, a.Z - b.Z);
+            Vector3D bc = new Vector3D(0, c.Y - b.Y, c.Z - b.Z);
+
+            float angle = (float)Vector3D.AngleBetween(ba, bc); // degrees
+            return (float)(Math.PI / 180) * angle; // radians
         }
     }
 }
