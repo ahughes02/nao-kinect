@@ -34,11 +34,11 @@ namespace NAO_Kinect
         private bool invert = true;
         private string rHandStatus = "unknown";
         private string lHandStatus = "unkown";
-        private readonly string[] invertedJointNames = {"LShoulderRoll", "RShoulderRoll", "LElbowRoll", "RElbowRoll"};
-        private readonly string[] jointNames = { "RShoulderRoll", "LShoulderRoll", "RElbowRoll", "LElbowRoll" };
+        private readonly string[] invertedJointNames = {"LShoulderRoll", "RShoulderRoll", "LElbowRoll", "RElbowRoll", "LShoulderPitch", "RShoulderPitch"};
+        private readonly string[] jointNames = { "RShoulderRoll", "LShoulderRoll", "RElbowRoll", "LElbowRoll", "RShoulderPitch", "LShoulderPitch" };
         private float[] calibrationAngles = new float[6];
         private float[] oldAngles = new float[6];
-        private float[] finalAngles = new float[4];
+        private float[] finalAngles = new float[6];
 
         /// <summary>
         /// Data structures
@@ -275,18 +275,18 @@ namespace NAO_Kinect
                 if (allowNaoUpdates)
                 {
                     // Check to make sure that angle has changed enough to send new angle and update angle if it has
-                    for (var x = 0; x < 4; x++)
+                    for (var x = 0; x < 6; x++)
                     {
-                        if ((Math.Abs(oldAngles[x]) - Math.Abs(info.angles[x]) > .05 || Math.Abs(oldAngles[x]) - Math.Abs(info.angles[x]) < .05))
+                        if ((Math.Abs(oldAngles[x]) - Math.Abs(finalAngles[x]) > .1 || Math.Abs(oldAngles[x]) - Math.Abs(finalAngles[x]) < .1))
                         {
-                            oldAngles[x] = info.angles[x];
+                            oldAngles[x] = finalAngles[x];
                             if (invert)
                             {
-                                updateNAO(info.angles[x], invertedJointNames[x]);
+                                updateNAO(finalAngles[x], invertedJointNames[x]);
                             }
                             else
                             {
-                                updateNAO(info.angles[x], jointNames[x]);
+                                updateNAO(finalAngles[x], jointNames[x]);
                             }
                         }
                     }
