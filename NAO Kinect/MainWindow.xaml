@@ -12,9 +12,8 @@
         <TextBlock x:Name="debug2" HorizontalAlignment="Left" Height="174" Margin="10,576,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="639" FontSize="28" Text="SAMPLE TEXT"/>
         <TextBox x:Name="ipBox" HorizontalAlignment="Left" Height="24" Margin="66,24,0,0" TextWrapping="Wrap" Text="69.88.163.32" VerticalAlignment="Top" Width="100" FontSize="14"/>
         <Label Content="NAO IP:" HorizontalAlignment="Left" Margin="7,20,0,0" VerticalAlignment="Top" FontSize="14"/>
-        <Button x:Name="calibrateButton" Content="Calibrate" HorizontalAlignment="Left" Margin="412,24,0,0" VerticalAlignment="Top" Width="85" Click="calibrateButton_Click" RenderTransformOrigin="-0.009,0.645" FontSize="14" Height="24"/>
         <TextBlock x:Name="debug3" HorizontalAlignment="Left" Height="174" Margin="661,576,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="523" FontSize="28" Text="SAMPLE TEXT"/>
-        <CheckBox x:Name="invertCheck" Content="Invert Controls" HorizontalAlignment="Left" Margin="502,0,0,720" VerticalAlignment="Bottom" IsChecked="True" Checked="invertCheck_Checked" Unchecked="invertCheck_Unchecked" FontSize="14" Height="18"/>
+        <CheckBox x:Name="invertCheck" Content="Invert Controls" HorizontalAlignment="Left" Margin="539,0,0,723" VerticalAlignment="Bottom" IsChecked="True" Checked="invertCheck_Checked" Unchecked="invertCheck_Unchecked" FontSize="14" Height="18"/>
         <Label x:Name="Debug_Label_2" Content="Kinect Audio:" HorizontalAlignment="Left" Height="31" Margin="10,545,0,0" VerticalAlignment="Top" Width="119" FontSize="16"/>
         <Label x:Name="Debug_Label_3" Content="Exceptions: " HorizontalAlignment="Left" Height="31" Margin="661,545,0,0" VerticalAlignment="Top" Width="119" FontSize="16"/>
 

@@ -24,19 +24,18 @@ namespace NAO_Kinect
         private Motion naoMotion;
         private BodyProcessing bodyProcessing;
         private KinectInterface kinectInterface;
-        private Thread kinectThread;
+        //private Thread kinectThread;
         
         /// <summary>
         /// Variables
         /// </summary>
-        private bool calibrated = false;
         private bool allowNaoUpdates = false;
         private bool invert = true;
         private string rHandStatus = "unknown";
         private string lHandStatus = "unkown";
         private readonly string[] invertedJointNames = {"LShoulderRoll", "RShoulderRoll", "LElbowRoll", "RElbowRoll", "LShoulderPitch", "RShoulderPitch"};
         private readonly string[] jointNames = { "RShoulderRoll", "LShoulderRoll", "RElbowRoll", "LElbowRoll", "RShoulderPitch", "LShoulderPitch" };
-        private float[] calibrationAngles = new float[6];
+        private float[] offset = {.3f, .3f, 2.7f, 2.7f, 1.3f, 1.3f};
         private float[] oldAngles = new float[6];
         private float[] finalAngles = new float[6];
 
@@ -141,16 +140,6 @@ namespace NAO_Kinect
         }
 
         /// <summary>
-        /// Event handler for calibrate button click
-        /// </summary>
-        /// <param name="sender"> Object that generated the event </param>
-        /// <param name="e"> Any additional arguments </param>
-        private void calibrateButton_Click(object sender, RoutedEventArgs e)
-        {
-            calibrated = false;
-        }
-
-        /// <summary>
         /// Event handler for invert check box being checked
         /// </summary>
         /// <param name="sender"> Object that generated the event </param>
@@ -213,11 +202,6 @@ namespace NAO_Kinect
                 {
                     stopButton.RaiseEvent(new RoutedEventArgs(ButtonBase.ClickEvent));
                 }
-
-                if (semanticResult == "calibrate")
-                {
-                    calibrated = false;
-                }
             }
             else // Else say that it was rejected and confidence
             {
@@ -237,20 +221,11 @@ namespace NAO_Kinect
 
             if (!info.noTrackedBody)
             {
-                // Checks for calibration flag and then updates calibration if it is set to true
-                if (calibrated == false)
-                {
-                    for (var x = 0; x < 6; x++)
-                    {
-                        calibrationAngles[x] = info.angles[x];
-                    }
-                    calibrated = true;
-                }
 
                 // Generate calibrated angles
                 for (var x = 0; x < 6; x++)
                 {
-                    finalAngles[x] = info.angles[x] - calibrationAngles[x]; // adjustment to work with NAO robot angles
+                    finalAngles[x] = info.angles[x] - offset[x]; // adjustment to work with NAO robot angles
                 }
 
                 // Show angle informationin the UI
