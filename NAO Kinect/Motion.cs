@@ -142,7 +142,8 @@ namespace NAO_Kinect
         {
             try
             {
-                naoMotion.setAngles(joint, value, 0.3f);
+                // joint ID, radians, motor speed
+                naoMotion.setAngles(joint, value, 0.1f);
                 return true;
             }
             catch (Exception e)

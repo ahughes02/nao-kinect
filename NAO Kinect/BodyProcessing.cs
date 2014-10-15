@@ -108,15 +108,15 @@ namespace NAO_Kinect
                 bodyInfo.angles[1] = angleCalcXY(hipLeft, shoulderLeft, elbowLeft);
 
                 // Stores the right elbow roll in radians
-                bodyInfo.angles[2] = angleCalc3D(shoulderRight, elbowRight, wristRight);
+                bodyInfo.angles[2] = 3.0f - angleCalc3D(shoulderRight, elbowRight, wristRight);
                 // Stores the left elbow roll in radians
-                bodyInfo.angles[3] = angleCalc3D(shoulderLeft, elbowLeft, wristLeft);
+                bodyInfo.angles[3] = 3.0f - angleCalc3D(shoulderLeft, elbowLeft, wristLeft);
 
                 // Shoulder pitch should be same as shoulder roll but with angleCalcYZ
                 // Stores the right shoulder pitch in radians
-                bodyInfo.angles[4] = angleCalcYZ(hipRight, shoulderRight, elbowRight);
+                bodyInfo.angles[4] = 0 - angleCalcYZ(hipRight, shoulderRight, elbowRight);
                 // Stores the left shoulder pitch in radians
-                bodyInfo.angles[5] = angleCalcYZ(hipLeft, shoulderLeft, elbowLeft);
+                bodyInfo.angles[5] = 0 - angleCalcYZ(hipLeft, shoulderLeft, elbowLeft);
             }
             else
             {
@@ -142,6 +142,7 @@ namespace NAO_Kinect
             var bc = new Vector3D(c.X - b.X, c.Y - b.Y, 0);
 
             var angle = (float)Vector3D.AngleBetween(ba, bc); // degrees
+
             return (float)(Math.PI / 180) * angle; // radians
         }
 

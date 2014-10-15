@@ -35,7 +35,7 @@ namespace NAO_Kinect
         private string lHandStatus = "unkown";
         private readonly string[] invertedJointNames = {"LShoulderRoll", "RShoulderRoll", "LElbowRoll", "RElbowRoll", "LShoulderPitch", "RShoulderPitch"};
         private readonly string[] jointNames = { "RShoulderRoll", "LShoulderRoll", "RElbowRoll", "LElbowRoll", "RShoulderPitch", "LShoulderPitch" };
-        private float[] offset = {.3f, .3f, 2.7f, 2.7f, 1.3f, 1.3f};
+        private float[] offset = {0.4f, 0.4f, 0.2f, 0.2f, -1.6f, -1.6f};
         private float[] oldAngles = new float[6];
         private float[] finalAngles = new float[6];
 
@@ -346,24 +346,16 @@ namespace NAO_Kinect
         private void updateNAO(float angle, string joint)
         {
             // RShoulderRoll and RElbowRoll require inverted angles
-            if (joint == "RShoulderRoll" || joint == "RElbowRoll")
+            if (joint == "RShoulderRoll" || joint == "LElbowRoll")
             {
                 // Invert the angle
                 angle = (0 - angle);
-
-                // Check for error when moving joint
-                if (!naoMotion.moveJoint(angle, joint))
-                {
-                    debug3.Text = "Exception occured when communicating with NAO check C:\\NAO Motion\\ for details";
-                }
             }
-            else // else just move the joint
+
+            // Check for error when moving joint
+            if (!naoMotion.moveJoint(angle, joint))
             {
-                // Check for error when moving joint
-                if (!naoMotion.moveJoint(angle, joint))
-                {
-                    debug3.Text = "Exception occured when communicating with NAO check C:\\NAO Motion\\ for details";
-                }
+                debug3.Text = "Exception occured when communicating with NAO check C:\\NAO Motion\\ for details";
             }
         }
     }
