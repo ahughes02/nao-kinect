@@ -50,24 +50,11 @@ namespace NAO_Kinect
         /// Class deconstructor
         /// Cuts motor stiffness
         /// </summary>
-        ~Motion()
+        public void removeStiffness()
         {
-            if (naoMotion == null)
-            {
-                return;
-            }
-            try
-            {
-                // Reduce stiffness
-                naoMotion.stiffnessInterpolation("Head", 0.0f, 0.0f);
-                naoMotion.stiffnessInterpolation("LArm", 0.0f, 0.0f);
-                naoMotion.stiffnessInterpolation("RArm", 0.0f, 0.0f);
-            }
-            catch (Exception e)
-            {
-                // Display error message and write exceptions to a file
-                File.WriteAllText(@"C:\\NAO Motion\\exception.txt", e.ToString());
-            }
+            naoMotion.stiffnessInterpolation("Head", 0.0f, 0.0f);
+            naoMotion.stiffnessInterpolation("LArm", 0.0f, 0.0f);
+            naoMotion.stiffnessInterpolation("RArm", 0.0f, 0.0f);
         }
 
         /// <summary>

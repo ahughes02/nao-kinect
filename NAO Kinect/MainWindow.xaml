@@ -3,19 +3,28 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         Title="NAO Kinect" Height="800" Width="1200" Loaded="MainWindow_Loaded" Unloaded="MainWindow_Unloaded" WindowStartupLocation="CenterScreen" ResizeMode="CanMinimize">
     <Grid>
-        <Button x:Name="startButton" Content="Start" HorizontalAlignment="Left" Margin="176,24,0,0" VerticalAlignment="Top" Width="85" Click="startButton_Click" Height="24" FontSize="14"/>
-        <Button x:Name="stopButton" Content="Stop" HorizontalAlignment="Left" Margin="291,24,0,0" VerticalAlignment="Top" Width="85" IsEnabled="False" Click="stopButton_Click" Height="24" FontSize="14"/>
+        <Button x:Name="startButton" Content="Connect" HorizontalAlignment="Left" Margin="732,135,0,0" VerticalAlignment="Top" Width="85" Click="startButton_Click" Height="24" FontSize="14"/>
+        <Button x:Name="stopButton" Content="Disconnect" HorizontalAlignment="Left" Margin="838,135,0,0" VerticalAlignment="Top" Width="85" IsEnabled="False" Click="stopButton_Click" Height="24" FontSize="14"/>
         <Image x:Name="Image" HorizontalAlignment="Left" Height="480" Margin="10,56,0,0" VerticalAlignment="Top" Width="640" Source="NO FEED.png"/>
-        <Label x:Name="gestureLabel" Content="Start or Stop Motion Detection" HorizontalAlignment="Left" Margin="176,-5,0,0" VerticalAlignment="Top" Width="200" Height="30" FontSize="14"/>
-        <TextBlock x:Name="debug1" HorizontalAlignment="Left" Height="480" Margin="661,56,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="523" FontSize="28"><Run Text="SA"/><Run Text="M"/><Run Text="PLE TEXT"/></TextBlock>
-        <Label x:Name="Debug_Label" Content="Current Angles:" HorizontalAlignment="Left" Height="31" Margin="661,22,0,0" VerticalAlignment="Top" Width="119" FontSize="16"/>
-        <TextBlock x:Name="debug2" HorizontalAlignment="Left" Height="174" Margin="10,576,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="639" FontSize="28" Text="SAMPLE TEXT"/>
-        <TextBox x:Name="ipBox" HorizontalAlignment="Left" Height="24" Margin="66,24,0,0" TextWrapping="Wrap" Text="69.88.163.32" VerticalAlignment="Top" Width="100" FontSize="14"/>
-        <Label Content="NAO IP:" HorizontalAlignment="Left" Margin="7,20,0,0" VerticalAlignment="Top" FontSize="14"/>
-        <TextBlock x:Name="debug3" HorizontalAlignment="Left" Height="174" Margin="661,576,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="523" FontSize="28" Text="SAMPLE TEXT"/>
-        <CheckBox x:Name="invertCheck" Content="Invert Controls" HorizontalAlignment="Left" Margin="539,0,0,723" VerticalAlignment="Bottom" IsChecked="True" Checked="invertCheck_Checked" Unchecked="invertCheck_Unchecked" FontSize="14" Height="18"/>
-        <Label x:Name="Debug_Label_2" Content="Kinect Audio:" HorizontalAlignment="Left" Height="31" Margin="10,545,0,0" VerticalAlignment="Top" Width="119" FontSize="16"/>
-        <Label x:Name="Debug_Label_3" Content="Exceptions: " HorizontalAlignment="Left" Height="31" Margin="661,545,0,0" VerticalAlignment="Top" Width="119" FontSize="16"/>
+        <TextBlock x:Name="debug" HorizontalAlignment="Left" Height="117" Margin="731,418,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="405" FontSize="28" Text="READY"/>
+        <TextBox x:Name="ipBox" HorizontalAlignment="Left" Height="24" Margin="790,106,0,0" TextWrapping="Wrap" Text="69.88.163.32" VerticalAlignment="Top" Width="100" FontSize="14"/>
+        <Label Content="NAO IP:" HorizontalAlignment="Left" Margin="727,102,0,0" VerticalAlignment="Top" FontSize="14"/>
+        <CheckBox x:Name="invertCheck" Content="Invert Controls" HorizontalAlignment="Left" Margin="941,0,0,614" VerticalAlignment="Bottom" IsChecked="True" Checked="invertCheck_Checked" Unchecked="invertCheck_Unchecked" FontSize="14" Height="18"/>
+        <Label x:Name="Debug_Label_2" Content="Kinect Audio:" HorizontalAlignment="Left" Height="31" Margin="726,387,0,0" VerticalAlignment="Top" Width="118" FontSize="16"/>
+        <Label Content="NAO - DISCONNECTED" HorizontalAlignment="Left" Margin="726,56,0,0" VerticalAlignment="Top" Height="41" Width="326" FontSize="24"/>
+        <Label Content="Kinect - DISCONNECTED" HorizontalAlignment="Left" Margin="10,10,0,0" VerticalAlignment="Top" Height="41" Width="326" FontSize="24"/>
+        <Slider x:Name="lsrSlider" HorizontalAlignment="Left" Margin="160,577,0,0" VerticalAlignment="Top" Width="183" Maximum="1.33" Minimum="-0.32" IsEnabled="False"/>
+        <Slider x:Name="rerSlider" HorizontalAlignment="Left" Margin="160,683,0,0" VerticalAlignment="Top" Width="183" IsEnabled="False" Maximum="-0.034" Minimum="-1.55"/>
+        <Slider x:Name="lerSlider" HorizontalAlignment="Left" Margin="160,648,0,0" VerticalAlignment="Top" Width="183" Minimum="-1.55" Maximum="-0.034" IsEnabled="False"/>
+        <Slider x:Name="rsrSlider" HorizontalAlignment="Left" Margin="160,613,0,0" VerticalAlignment="Top" Width="183" IsEnabled="False" Maximum="1.33" Minimum="-0.32"/>
+        <Slider x:Name="lspSlider" HorizontalAlignment="Left" Margin="387,577,0,0" VerticalAlignment="Top" Width="23" Orientation="Vertical" Height="129" Maximum="2.1" Minimum="-2.1" IsEnabled="False"/>
+        <Slider x:Name="rspSlider" HorizontalAlignment="Left" Margin="455,577,0,0" VerticalAlignment="Top" Width="20" Orientation="Vertical" Height="129" Maximum="2.1" Minimum="-2.1" IsEnabled="False"/>
+        <Label x:Name="Debug_Label_Copy" Content="LSR:" HorizontalAlignment="Left" Height="31" Margin="10,568,0,0" VerticalAlignment="Top" Width="119" FontSize="16"/>
+        <Label x:Name="Debug_Label_Copy1" Content="RER:" HorizontalAlignment="Left" Height="31" Margin="10,675,0,0" VerticalAlignment="Top" Width="119" FontSize="16"/>
+        <Label x:Name="Debug_Label_Copy2" Content="LER:" HorizontalAlignment="Left" Height="31" Margin="10,640,0,0" VerticalAlignment="Top" Width="119" FontSize="16"/>
+        <Label x:Name="Debug_Label_Copy3" Content="RSR:" HorizontalAlignment="Left" Height="31" Margin="10,604,0,0" VerticalAlignment="Top" Width="119" FontSize="16"/>
+        <Label x:Name="Debug_Label_Copy4" Content="LSP" HorizontalAlignment="Left" Height="31" Margin="380,706,0,0" VerticalAlignment="Top" Width="40" FontSize="16"/>
+        <Label x:Name="Debug_Label_Copy5" Content="RSP" HorizontalAlignment="Left" Height="31" Margin="445,706,0,0" VerticalAlignment="Top" Width="40" FontSize="16"/>
 
     </Grid>
 </Window>
