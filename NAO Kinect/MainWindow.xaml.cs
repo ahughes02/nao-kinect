@@ -80,6 +80,8 @@ namespace NAO_Kinect
         {
             processing.connect(ipBox.Text);
 
+            naoStatus.Content = "NAO - CONNECTED";
+
             stopButton.IsEnabled = true;
             startButton.IsEnabled = false;
         }
@@ -93,6 +95,8 @@ namespace NAO_Kinect
         {
             processing.disconnect();
 
+            naoStatus.Content = "NAO - DISCONNECTED";
+
             stopButton.IsEnabled = false;
             startButton.IsEnabled = true;
         }
@@ -104,7 +108,10 @@ namespace NAO_Kinect
         /// <param name="e"> Any additional arguments </param>
         private void invertCheck_Checked(object sender, RoutedEventArgs e)
         {
-            processing.setInvert(true);
+            if (processing != null)
+            {
+                processing.setInvert(true);
+            }
         }
 
         /// <summary>
@@ -114,7 +121,10 @@ namespace NAO_Kinect
         /// <param name="e"> Any additional arguments </param>
         private void invertCheck_Unchecked(object sender, RoutedEventArgs e)
         {
-            processing.setInvert(false);
+            if (processing != null)
+            {
+                processing.setInvert(false);
+            }
         }
 
         private void processing_imageUpdate(object sender, EventArgs e)
@@ -127,57 +137,57 @@ namespace NAO_Kinect
             info = processing.getBodyInfo();
 
             // This is pretty awful
-            if(lsrSlider.Maximum < info.angles[0] && info.angles[0] > lsrSlider.Minimum)
+            if(lsrSlider.Maximum > info.angles[0] && info.angles[0] > lsrSlider.Minimum)
             {
                 lsrSlider.Value = info.angles[0];
-                rspSlider.Background = Brushes.Transparent;
+                lsrSlider.Background = Brushes.Transparent;
             }
             else
             {
                 lsrSlider.Background = Brushes.Red; 
             }
 
-            if (rsrSlider.Maximum < info.angles[1] && info.angles[1] > rsrSlider.Minimum)
+            if (rsrSlider.Maximum > info.angles[1] && info.angles[1] > rsrSlider.Minimum)
             {
                 rsrSlider.Value = info.angles[1];
-                rspSlider.Background = Brushes.Transparent;
+                rsrSlider.Background = Brushes.Transparent;
             }
             else
             {
                 rsrSlider.Background = Brushes.Red; 
             }
 
-            if (lerSlider.Maximum < info.angles[2] && info.angles[2] > lerSlider.Minimum)
+            if (lerSlider.Maximum > info.angles[2] && info.angles[2] > lerSlider.Minimum)
             {
                 lerSlider.Value = info.angles[2];
-                rspSlider.Background = Brushes.Transparent;
+                lerSlider.Background = Brushes.Transparent;
             }
             else
             {
                 lerSlider.Background = Brushes.Red; 
             }
 
-            if (rerSlider.Maximum < info.angles[3] && info.angles[3] > rerSlider.Minimum)
+            if (rerSlider.Maximum > info.angles[3] && info.angles[3] > rerSlider.Minimum)
             {
                 rerSlider.Value = info.angles[3];
-                rspSlider.Background = Brushes.Transparent;
+                rerSlider.Background = Brushes.Transparent;
             }
             else
             {
                 rerSlider.Background = Brushes.Red; 
             }
 
-            if (lspSlider.Maximum < info.angles[4] && info.angles[4] > lspSlider.Minimum)
+            if (lspSlider.Maximum > info.angles[4] && info.angles[4] > lspSlider.Minimum)
             {
                 lspSlider.Value = info.angles[4];
-                rspSlider.Background = Brushes.Transparent;
+                lspSlider.Background = Brushes.Transparent;
             }
             else
             {
                 lspSlider.Background = Brushes.Red; 
             }
 
-            if (rspSlider.Maximum < info.angles[5] && info.angles[5] > rspSlider.Minimum)
+            if (rspSlider.Maximum > info.angles[5] && info.angles[5] > rspSlider.Minimum)
             {
                 rspSlider.Value = info.angles[5];
                 rspSlider.Background = Brushes.Transparent;
@@ -190,7 +200,7 @@ namespace NAO_Kinect
 
         private void processing_speechUpdate(object sender, EventArgs e)
         {
-            debug.Text = processing.getSpeechStatus();
+            audioStatus.Text = processing.getSpeechStatus();
 
             if (!processing.getSpeechResult() && stopButton.IsEnabled)
             {

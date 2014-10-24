@@ -49,6 +49,7 @@ namespace NAO_Kinect
         private static Body trackedBody;
         BodyInfo bodyInfo;
         BodyInfo info;
+        private BodyInfo UIinfo;
         private Motion naoMotion;
         ImageSource currentFrame;
         string speechStatus;
@@ -118,7 +119,7 @@ namespace NAO_Kinect
 
         public BodyInfo getBodyInfo()
         {
-            return info;
+            return UIinfo;
         }
 
         public ImageSource getFrame()
@@ -304,14 +305,7 @@ namespace NAO_Kinect
                         if ((Math.Abs(oldAngles[x]) - Math.Abs(info.angles[x]) > .1 || Math.Abs(info.angles[x]) - Math.Abs(info.angles[x]) < .1))
                         {
                             oldAngles[x] = info.angles[x];
-                            if (invert)
-                            {
-                                updateNAO(info.angles[x], invertedJointNames[x]);
-                            }
-                            else
-                            {
-                                updateNAO(info.angles[x], jointNames[x]);
-                            }
+                            updateNAO(info.angles[x], invert ? invertedJointNames[x] : jointNames[x]);
                         }
                     }
 
@@ -383,6 +377,7 @@ namespace NAO_Kinect
 
             if (pNewTick != null)
             {
+                UIinfo = info;
                 pNewTick(this, EventArgs.Empty);
             }
         }
