@@ -94,8 +94,8 @@ namespace NAO_Kinect
                 sre = new SpeechRecognitionEngine(ri.Id);   // Initializes Speech Recognition Engine
 
                 // Create simple string array that contains speech recognition data and interpreted values
-                string[] valuesHeard = { "computer start", "computer stop", "computer calibrate" };
-                string[] valuesInterpreted = { "on", "off", "calibrate" };
+                string[] valuesHeard = { "computer start", "computer stop" };
+                string[] valuesInterpreted = { "on", "off"};
 
                 var commands = new Choices(); // Initializes Choices for engine
 
