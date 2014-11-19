@@ -135,66 +135,33 @@ namespace NAO_Kinect
         private void processing_angleUpdate(object sender, EventArgs e)
         {
             info = processing.getBodyInfo();
-
             // This is pretty awful
-            if(lsrSlider.Maximum > info.angles[0] && info.angles[0] > lsrSlider.Minimum)
-            {
-                lsrSlider.Value = info.angles[0];
-                lsrSlider.Background = Brushes.Transparent;
-            }
-            else
-            {
-                lsrSlider.Background = Brushes.Red; 
-            }
 
-            if (rsrSlider.Maximum > info.angles[1] && info.angles[1] > rsrSlider.Minimum)
-            {
-                rsrSlider.Value = info.angles[1];
-                rsrSlider.Background = Brushes.Transparent;
-            }
-            else
-            {
-                rsrSlider.Background = Brushes.Red; 
-            }
+            display_angle(info.angles[0], "RSR", rsrLabel, rsrSlider);
+            display_angle(info.angles[1], "LSR", lsrLabel, lsrSlider);
+            display_angle(info.angles[2], "RER", rerLabel, rerSlider);
+            display_angle(info.angles[3], "LER", lerLabel, lerSlider);
+            display_angle(info.angles[4], "RSP", rspLabel, rspSlider);
+            display_angle(info.angles[5], "LSP", lspLabel, lspSlider);
 
-            if (lerSlider.Maximum > info.angles[2] && info.angles[2] > lerSlider.Minimum)
-            {
-                lerSlider.Value = info.angles[2];
-                lerSlider.Background = Brushes.Transparent;
-            }
-            else
-            {
-                lerSlider.Background = Brushes.Red; 
-            }
+        }
 
-            if (rerSlider.Maximum > info.angles[3] && info.angles[3] > rerSlider.Minimum)
+        private void display_angle(float angle, string name, System.Windows.Controls.Label label, System.Windows.Controls.ProgressBar slider){
+            
+            label.Content = name + " " + String.Format("{0:F1}", angle);
+            slider.Value = angle;
+            if (angle < slider.Minimum)
             {
-                rerSlider.Value = info.angles[3];
-                rerSlider.Background = Brushes.Transparent;
+                slider.Background = Brushes.Transparent;
+            }
+            else if (angle > slider.Maximum)
+            {
+                slider.Foreground = Brushes.Green;
             }
             else
             {
-                rerSlider.Background = Brushes.Red; 
-            }
-
-            if (lspSlider.Maximum > info.angles[4] && info.angles[4] > lspSlider.Minimum)
-            {
-                lspSlider.Value = info.angles[4];
-                lspSlider.Background = Brushes.Transparent;
-            }
-            else
-            {
-                lspSlider.Background = Brushes.Red; 
-            }
-
-            if (rspSlider.Maximum > info.angles[5] && info.angles[5] > rspSlider.Minimum)
-            {
-                rspSlider.Value = info.angles[5];
-                rspSlider.Background = Brushes.Transparent;
-            }
-            else
-            {
-                rspSlider.Background = Brushes.Red; 
+                slider.Foreground = Brushes.LimeGreen;
+                slider.Background = Brushes.LightGray;
             }
         }
 
