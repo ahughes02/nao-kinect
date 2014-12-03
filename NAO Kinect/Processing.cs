@@ -43,7 +43,7 @@ namespace NAO_Kinect
         private string lHandStatus = "unkown";
         private readonly string[] invertedJointNames = { "LShoulderRoll", "RShoulderRoll", "LElbowRoll", "RElbowRoll", "LShoulderPitch", "RShoulderPitch" };
         private readonly string[] jointNames = { "RShoulderRoll", "LShoulderRoll", "RElbowRoll", "LElbowRoll", "RShoulderPitch", "LShoulderPitch" };
-        private float[] offset = { 0.4f, 0.4f, -3.0f, -3.0f, -1.6f, -1.6f };
+        private float[] offset = { 0.4f, 0.4f, -2.5f, -2.5f, -1.6f, -1.6f };
         private float[] oldAngles = new float[6];
         private static KinectInterface kinectInterface;
         private static Body trackedBody;
