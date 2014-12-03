@@ -43,7 +43,7 @@ namespace NAO_Kinect
         private string lHandStatus = "unkown";
         private readonly string[] invertedJointNames = { "LShoulderRoll", "RShoulderRoll", "LElbowRoll", "RElbowRoll", "LShoulderPitch", "RShoulderPitch" };
         private readonly string[] jointNames = { "RShoulderRoll", "LShoulderRoll", "RElbowRoll", "LElbowRoll", "RShoulderPitch", "LShoulderPitch" };
-        private float[] offset = { 0.4f, 0.4f, 2.0f, 2.0f, -1.6f, -1.6f };
+        private float[] offset = { 0.4f, 0.4f, -3.0f, -3.0f, -1.6f, -1.6f };
         private float[] oldAngles = new float[6];
         private static KinectInterface kinectInterface;
         private static Body trackedBody;
@@ -213,9 +213,9 @@ namespace NAO_Kinect
                 bodyInfo.angles[1] = angleCalc3D(hipLeft, shoulderLeft, elbowLeft);
 
                 // Stores the right elbow roll in radians
-                bodyInfo.angles[2] = 3.0f - angleCalc3D(shoulderRight, elbowRight, wristRight);
+                bodyInfo.angles[2] = 0 - angleCalc3D(shoulderRight, elbowRight, wristRight);
                 // Stores the left elbow roll in radians
-                bodyInfo.angles[3] = 3.0f - angleCalc3D(shoulderLeft, elbowLeft, wristLeft);
+                bodyInfo.angles[3] = 0 - angleCalc3D(shoulderLeft, elbowLeft, wristLeft);
 
                 // Shoulder pitch should be same as shoulder roll but with angleCalcYZ
                 // Stores the right shoulder pitch in radians
@@ -423,12 +423,12 @@ namespace NAO_Kinect
 
                 if(semanticResult == "on")
                 {
-                    allowNaoUpdates = true;
+                    speechResult = true;
                 }
 
                 if(semanticResult == "off")
                 {
-                    allowNaoUpdates = false;
+                    speechResult = false;
                 }
             }
             else // Else say that it was rejected and confidence
@@ -462,6 +462,11 @@ namespace NAO_Kinect
             if (!naoMotion.moveJoint(angle, joint))
             {
                 //debug3.Text = "Exception occured when communicating with NAO check C:\\NAO Motion\\ for details";
+            }
+
+            if (joint == "RElbowRoll")
+            {
+                Console.WriteLine(joint + ": " + angle);
             }
         }
     }

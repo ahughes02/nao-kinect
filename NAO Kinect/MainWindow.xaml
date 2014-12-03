@@ -14,8 +14,8 @@
         <Label x:Name="naoStatus" Content="NAO - DISCONNECTED" HorizontalAlignment="Left" Margin="726,56,0,0" VerticalAlignment="Top" Height="41" Width="326" FontSize="24"/>
         <Label x:Name="kinectStatus" Content="Kinect - CONNECTED" HorizontalAlignment="Left" Margin="10,10,0,0" VerticalAlignment="Top" Height="41" Width="326" FontSize="24"/>
         <ProgressBar x:Name="lsrSlider" HorizontalAlignment="Left" Margin="160,577,0,0" VerticalAlignment="Top" Width="183" Maximum="1.33" Minimum="-0.32" IsEnabled="False" Height="22"/>
-        <ProgressBar x:Name="rerSlider" HorizontalAlignment="Left" Margin="160,683,0,0" VerticalAlignment="Top" Width="183" IsEnabled="False" Maximum="-0.034" Minimum="-1.55" Height="23"/>
-        <ProgressBar x:Name="lerSlider" HorizontalAlignment="Left" Margin="160,648,0,0" VerticalAlignment="Top" Width="183" Minimum="-1.55" Maximum="-0.034" IsEnabled="False" Height="23"/>
+        <ProgressBar x:Name="rerSlider" HorizontalAlignment="Left" Margin="160,683,0,0" VerticalAlignment="Top" Width="183" IsEnabled="False" Maximum="1.5" Minimum="0" Height="23"/>
+        <ProgressBar x:Name="lerSlider" HorizontalAlignment="Left" Margin="160,648,0,0" VerticalAlignment="Top" Width="183" Minimum="0" Maximum="1.5" IsEnabled="False" Height="23"/>
         <ProgressBar x:Name="rsrSlider" HorizontalAlignment="Left" Margin="160,613,0,0" VerticalAlignment="Top" Width="183" IsEnabled="False" Maximum="1.33" Minimum="-0.32" Height="22"/>
         <ProgressBar x:Name="lspSlider" HorizontalAlignment="Left" Margin="387,577,0,0" VerticalAlignment="Top" Width="23" Orientation="Vertical" Height="129" Maximum="2.1" Minimum="-2.1" IsEnabled="False"/>
         <ProgressBar x:Name="rspSlider" HorizontalAlignment="Left" Margin="471,577,0,0" VerticalAlignment="Top" Width="20" Orientation="Vertical" Height="129" Maximum="2.1" Minimum="-2.1" IsEnabled="False"/>
