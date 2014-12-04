@@ -43,7 +43,7 @@ namespace NAO_Kinect
         private string lHandStatus = "unkown";
         private readonly string[] invertedJointNames = { "LShoulderRoll", "RShoulderRoll", "LElbowRoll", "RElbowRoll", "LShoulderPitch", "RShoulderPitch" };
         private readonly string[] jointNames = { "RShoulderRoll", "LShoulderRoll", "RElbowRoll", "LElbowRoll", "RShoulderPitch", "LShoulderPitch" };
-        private float[] offset = { 0.4f, 0.4f, -2.5f, -2.5f, -1.6f, -1.6f };
+        private float[] offset = { 0.8f, 0.8f, -2.5f, -2.5f, -2.1f, -2.1f };
         private float[] oldAngles = new float[6];
         private static KinectInterface kinectInterface;
         private static Body trackedBody;
@@ -156,7 +156,9 @@ namespace NAO_Kinect
                 var elbowRight = trackedBody.Joints[JointType.ElbowRight].Position;
 
                 var shoulderLeft = trackedBody.Joints[JointType.ShoulderLeft].Position;
+                var shoulderLeftNorm = trackedBody.JointOrientations[JointType.ShoulderLeft].Orientation;
                 var shoulderRight = trackedBody.Joints[JointType.ShoulderRight].Position;
+                var shoulderRightNorm = trackedBody.JointOrientations[JointType.ShoulderRight].Orientation;
 
                 var hipLeft = trackedBody.Joints[JointType.HipLeft].Position;
                 var hipRight = trackedBody.Joints[JointType.HipRight].Position;
@@ -209,8 +211,9 @@ namespace NAO_Kinect
                     bodyInfo.angles[1] = angleCalc3D(rollRefLeft, shoulderLeft, elbowLeft);
                 }*/
 
-                bodyInfo.angles[0] = angleCalc3D(hipRight, shoulderRight, elbowRight);
-                bodyInfo.angles[1] = angleCalc3D(hipLeft, shoulderLeft, elbowLeft);
+
+                bodyInfo.angles[0] = getShoulderRoll(shoulderRight, elbowRight, hipRight);
+                bodyInfo.angles[1] = getShoulderRoll(shoulderLeft, elbowLeft, hipLeft);
 
                 // Stores the right elbow roll in radians
                 bodyInfo.angles[2] = 0 - angleCalc3D(shoulderRight, elbowRight, wristRight);
@@ -219,15 +222,29 @@ namespace NAO_Kinect
 
                 // Shoulder pitch should be same as shoulder roll but with angleCalcYZ
                 // Stores the right shoulder pitch in radians
-                bodyInfo.angles[4] = 0 - angleCalcYZ(hipRight, shoulderRight, elbowRight);
+                bodyInfo.angles[4] = 0 - angleCalcYZ(hipRight, shoulderRight, elbowRight) * 2.0f;
                 // Stores the left shoulder pitch in radians
-                bodyInfo.angles[5] = 0 - angleCalcYZ(hipLeft, shoulderLeft, elbowLeft);
+                bodyInfo.angles[5] = 0 - angleCalcYZ(hipLeft, shoulderLeft, elbowLeft) * 2.0f;
             }
             else
             {
                 bodyInfo.noTrackedBody = true;
             }
             return bodyInfo;
+        }
+
+        // Calculates angle between a<-b and b->c for situation a->b->c
+        private static float getShoulderRoll(CameraSpacePoint shoulder, CameraSpacePoint elbow, CameraSpacePoint hip)
+        {
+            CameraSpacePoint xzRef = new CameraSpacePoint();
+            xzRef.X = shoulder.X;
+            xzRef.Y = elbow.Y;
+            xzRef.Z = elbow.Z;
+
+            var anglexz = angleCalcXZ(xzRef, shoulder, elbow);
+            var anglexy = angleCalcXY(hip, shoulder, elbow);
+
+            return (float)(anglexz * anglexy)/1.2f;
         }
 
         // Calculates angle between a<-b and b->c for situation a->b->c
@@ -239,6 +256,8 @@ namespace NAO_Kinect
             var angle = (float)Vector3D.AngleBetween(ba, bc); // degrees
             return (float)(Math.PI / 180) * angle; // radians
         }
+
+
 
         // Calculates angle between a<-b and b->c for situation a->b->c
         private static float angleCalcXZ(CameraSpacePoint a, CameraSpacePoint b, CameraSpacePoint c)
