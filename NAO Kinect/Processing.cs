@@ -331,7 +331,7 @@ namespace NAO_Kinect
                     {
                         if ((Math.Abs(oldAngles[x] - info.angles[x]) > .1 || Math.Abs(info.angles[x] - info.angles[x]) < .1))
                         {
-                            //oldAngles[x] = info.angles[x];
+                            oldAngles[x] = info.angles[x];
                             updateNAO(info.angles[x], invert ? invertedJointNames[x] : jointNames[x]);
                         }
                     }
