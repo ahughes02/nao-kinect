@@ -179,5 +179,10 @@ namespace NAO_Kinect
                 startButton.RaiseEvent(new RoutedEventArgs(ButtonBase.ClickEvent));
             }
         }
+
+        private void lspSlider_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
+        {
+
+        }
     }
 }

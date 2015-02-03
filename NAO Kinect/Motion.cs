@@ -35,10 +35,10 @@ namespace NAO_Kinect
             {
                 naoMotion = new MotionProxy(ip, 9559);
 
-                // Give joints stiffness
-                naoMotion.stiffnessInterpolation("Head", 0.4f, 0.4f);
-                naoMotion.stiffnessInterpolation("LArm", 0.4f, 0.4f);
-                naoMotion.stiffnessInterpolation("RArm", 0.4f, 0.4f);
+                // give joints stiffness
+                naoMotion.stiffnessInterpolation("Head", 1.0f, 1.0f);
+                naoMotion.stiffnessInterpolation("LArm", 1.0f, 1.0f);
+                naoMotion.stiffnessInterpolation("RArm", 1.0f, 1.0f); ;
             }
             catch (Exception e)
             {
@@ -130,7 +130,7 @@ namespace NAO_Kinect
             try
             {
                 // joint ID, radians, motor speed
-                naoMotion.setAngles(joint, value, 0.10f);
+                naoMotion.setAngles(joint, value, 0.15f);
                 return true;
             }
             catch (Exception e)

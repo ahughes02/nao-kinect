@@ -17,7 +17,7 @@
         <ProgressBar x:Name="rerSlider" HorizontalAlignment="Left" Margin="160,683,0,0" VerticalAlignment="Top" Width="183" IsEnabled="False" Maximum="1.5" Minimum="0" Height="23"/>
         <ProgressBar x:Name="lerSlider" HorizontalAlignment="Left" Margin="160,648,0,0" VerticalAlignment="Top" Width="183" Minimum="0" Maximum="1.5" IsEnabled="False" Height="23"/>
         <ProgressBar x:Name="rsrSlider" HorizontalAlignment="Left" Margin="160,613,0,0" VerticalAlignment="Top" Width="183" IsEnabled="False" Maximum="1.33" Minimum="-0.32" Height="22"/>
-        <ProgressBar x:Name="lspSlider" HorizontalAlignment="Left" Margin="387,577,0,0" VerticalAlignment="Top" Width="23" Orientation="Vertical" Height="129" Maximum="2.1" Minimum="-2.1" IsEnabled="False"/>
+        <ProgressBar x:Name="lspSlider" HorizontalAlignment="Left" Margin="387,577,0,0" VerticalAlignment="Top" Width="23" Orientation="Vertical" Height="129" Maximum="2.1" Minimum="-2.1" IsEnabled="False" ValueChanged="lspSlider_ValueChanged"/>
         <ProgressBar x:Name="rspSlider" HorizontalAlignment="Left" Margin="471,577,0,0" VerticalAlignment="Top" Width="20" Orientation="Vertical" Height="129" Maximum="2.1" Minimum="-2.1" IsEnabled="False"/>
         <Label x:Name="lsrLabel" Content="LSR:" HorizontalAlignment="Left" Height="31" Margin="10,568,0,0" VerticalAlignment="Top" Width="119" FontSize="16"/>
         <Label x:Name="rerLabel" Content="RER:" HorizontalAlignment="Left" Height="31" Margin="10,675,0,0" VerticalAlignment="Top" Width="119" FontSize="16"/>

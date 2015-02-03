@@ -43,7 +43,7 @@ namespace NAO_Kinect
         private string lHandStatus = "unkown";
         private readonly string[] invertedJointNames = { "LShoulderRoll", "RShoulderRoll", "LElbowRoll", "RElbowRoll", "LShoulderPitch", "RShoulderPitch" };
         private readonly string[] jointNames = { "RShoulderRoll", "LShoulderRoll", "RElbowRoll", "LElbowRoll", "RShoulderPitch", "LShoulderPitch" };
-        private float[] offset = { 0.8f, 0.8f, -2.5f, -2.5f, -2.1f, -2.1f };
+        private float[] offset = { 0.8f, 0.8f, -2.5f, -2.5f, -2.65f, -2.65f };
         private float[] oldAngles = new float[6];
         private static KinectInterface kinectInterface;
         private static Body trackedBody;
@@ -222,9 +222,9 @@ namespace NAO_Kinect
 
                 // Shoulder pitch should be same as shoulder roll but with angleCalcYZ
                 // Stores the right shoulder pitch in radians
-                bodyInfo.angles[4] = 0 - angleCalcYZ(hipRight, shoulderRight, elbowRight) * 2.0f;
+                bodyInfo.angles[4] = 0 - angleCalcYZ(hipRight, shoulderRight, elbowRight) * 1.5f;
                 // Stores the left shoulder pitch in radians
-                bodyInfo.angles[5] = 0 - angleCalcYZ(hipLeft, shoulderLeft, elbowLeft) * 2.0f;
+                bodyInfo.angles[5] = 0 - angleCalcYZ(hipLeft, shoulderLeft, elbowLeft) * 1.5f;
             }
             else
             {
@@ -315,15 +315,23 @@ namespace NAO_Kinect
                     info.angles[x] = info.angles[x] - offset[x]; // adjustment to work with NAO robot angles
                 }
 
+                if (info.angles[4] < -2.0f) info.angles[4] = -2.0f;
+                if (info.angles[5] < -2.0f) info.angles[5] = -2.0f;
+
+                if (info.angles[4] > 2.0f) info.angles[4] = 2.0f;
+                if (info.angles[5] > 2.0f) info.angles[5] = 2.0f;
+
+
+
                 // Check if updates should be sent to NAO
                 if (allowNaoUpdates)
                 {
                     // Check to make sure that angle has changed enough to send new angle and update angle if it has
                     for (var x = 0; x < 6; x++)
                     {
-                        if ((Math.Abs(oldAngles[x]) - Math.Abs(info.angles[x]) > .1 || Math.Abs(info.angles[x]) - Math.Abs(info.angles[x]) < .1))
+                        if ((Math.Abs(oldAngles[x] - info.angles[x]) > .1 || Math.Abs(info.angles[x] - info.angles[x]) < .1))
                         {
-                            oldAngles[x] = info.angles[x];
+                            //oldAngles[x] = info.angles[x];
                             updateNAO(info.angles[x], invert ? invertedJointNames[x] : jointNames[x]);
                         }
                     }
